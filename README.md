@@ -1,34 +1,52 @@
-[![构建状态](/badges/jk-exchange-api/build.svg)](/p/jk-exchange-api/ci/job)
+# school-saas-api
 
-[TOC]
+#### 介绍
+服务器端接口
 
-# 体验示例项目
+#### 模块
+- user: 用户
+- merchant: 商家
+- activity: 活动
+- pay: 支付
+- order: 订单
+- course: 课程
+- backend: 后台
 
-这个示例代码可以帮你快速了解一个简单的 Python Flask 网页应用。并已经配置好自动打包镜像过程。
+#### 生成 Model
+生成的 model 需要适配
+```bash
+pip install sqlacodegen
+sqlacodegen mysql://root:nas@mhm1234@139.196.78.95:3306/school-saas > models.py
+```
 
-文件解释
------------
+#### 迁移数据库
 
-样例包括:
+```bash
+export FLASK_APP=manage.py
 
-* README.md - 本文件
-* Jenkinsfile - 用以自动构建和测试的脚本
-* Dockerfile - 用以自动构建 Docker 镜像的脚本
-* requirements.txt - 依赖包文件
-* app.py - 主 Flask 服务器端源代码
+# model修改生成新的迁移文件
+flask db migrate
 
-快速开始
----------------
+# 执行迁移文件
+flask db upgrade
 
-如下这些引导，假定你想在自己的电脑上开发本项目。
+```
 
-1. 安装依赖
+#### 单元测试
+```bash
+# 准备
+# pip install flask-testing pytest
 
-        $ pip install -r requirements.txt
+# 测试整个 test 目录
+python -m pytest
+# 测试指定模块
+python -m pytest -s test\test_merchant.py
+# 测试指定函数/方法
+python -m pytest -s test\test_merchant.py::TestMerchant::test_register
+```
 
-
-2. 启动服务器
-
-        $ python app.py
-
-3. 打开 http://0.0.0.0:5000/ .
+#### docs
+```bash
+python manage.py
+```
+打开 [http://localhost:8000/docs/api](http://localhost:8000/docs/api)

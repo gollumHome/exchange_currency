@@ -83,13 +83,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@127.0.0.1:3306/school-saas'
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:gllue123@127.0.0.1:3306/school'
-    ELASTIC_SEARCH_HOST = ''
-    CERT_PATH = '/usr/local/www/saas-cert'
-    SERVICE_CATE_ID = ''
-    CDN_STATIC_PATH = '/usr/local/www/static/'
-    CDN_STATIC_URL = 'http://cdn.liyun.com/static/'
-    REDIS_SERVER_HOST = '139.196.78.95'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nsfocus@127.0.0.1:3306/work'
 
 
 class TestingConfig(Config):

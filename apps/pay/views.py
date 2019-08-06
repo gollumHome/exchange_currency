@@ -11,7 +11,7 @@ import logging
 from apps.pay import pv
 
 from apps.PayService import PayApi
-from apps.OrderService import OrderApi
+from apps.order.order_controller import OrderApi
 from apps.utils import Utils
 from apps.models import *
 from celerys import tasks

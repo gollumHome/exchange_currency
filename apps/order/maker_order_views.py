@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import enum
 from decimal import Decimal
+from apps import db
 from flask import jsonify, request
 import uuid
 import logging

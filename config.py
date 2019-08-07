@@ -22,12 +22,12 @@ class Config:
     SQLALCHEMY_POOL_TIMEOUT = 30
     SQLALCHEMY_ECHO = False
 
-    # tencent  oss key setting
-    OSS_REGION = 'ap-shanghai'
-    OSS_APP_ID = '1253692831'
-    OSS_ACCESSKEY_ID = 'AKIDWs7g9zIXNwJrQWtGtS4ZeiKqFXP6HUBl'
-    OSS_ACCESSKEY_SECRET = 'cP9nkPyiNr6EKGydn09A5YrhQ1UqRglY'
-    NO_AUTH_HOST = 'https://xiaoyunbao-1253692831.cos.ap-shanghai.myqcloud.com'
+
+    # oss key setting
+    OSS_ACCESSKEY_ID = 'LTAIpNbyB8MrXdVY'
+    OSS_ACCESSKEY_SECRET = '6ugz9ApEFStCbkL1jDyG6PRCEEaO1U'
+    OSS_PUBLIC_BUCKET = 'jk-pub'
+    OSS_PRIVATE_BUCKET = 'jk-auth'
 
     # tencent sms setting
     SMS_APP_ID = '1400207708'

@@ -5,18 +5,40 @@ import redis
 import json
 from traceback import print_exc
 
-
+from apps.models import *
 logger = logging.getLogger()
 
 
 class RedisClient:
     def __init__(self):
         self.pool = ""
-        self.redis_client = ""
+        self.redis_client = redis.Redis(host='127.0.0.1', port=6379, db=0)
         self.MY_ASSIST_RANK = 'MY_ASSIST_RANK'
 
-    def init_from_app(self, app):
-        self.redis_client = redis.Redis(host=app.config['REDIS_SERVER_HOST'], port=6379, db=0)
+    # def init_from_app(self, app):
+    #     self.redis_client = redis.Redis(host=app.config['REDIS_SERVER_HOST'], port=6379, db=0)
+
+
+    def get_scribe_obj(self):
+        return self.redis_client.pubsub()
+
+    # key weiyi
+    def set_scribe_expired(self, book_no, expire_time):
+        self.redis_client.expire(book_no, expire_time)
+
+    def subscribe_set_keyvalues(self, key, value):
+        self.redis_client.set(key, value)
+
+    def init_from_app(self):
+        self.redis_client = redis.Redis(host='127.0.0.1', port=6379, db=0)
+        return self.redis_client
+
+    def add_monitor_porcess_order(self, user, activity_id):
+        try:
+            assist_info_set = ''.join(['ASSIST_INFO_SET', '-', str(activity_id)])
+            self.redis_client.sadd(assist_info_set, user)
+        except:
+            print_exc
 
     def zdd_assist_rank(self, assist_count, user_id, activity_id):
         try:

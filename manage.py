@@ -9,9 +9,8 @@ from flask_cors import CORS
 from flask_request_params import bind_request_params
 
 from apps import create_app
-from apps import db
 from apps.get_middleware import StripContentTypeMiddleware
-from SchedulerService import SchedulerApi
+
 logger = logging.getLogger(__name__)
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 print(os.getenv('FLASK_CONFIG'))

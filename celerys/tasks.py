@@ -2,21 +2,14 @@
 
 import os
 import sys
-import time
-import random
-from traceback import print_exc
-from sqlalchemy import and_
 from celerys import create_celery
 from celery import platforms
 
 from apps import create_app
 
 from apps import db
-from apps.utils import Utils
 from SchedulerService import SchedulerApi
 from apps.PayService import PayApi
-from apps import redis_client
-
 
 platforms.C_FORCE_ROOT = True
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
@@ -27,6 +20,12 @@ celery = create_celery()
 scheduler_api = SchedulerApi(db, sys.modules[__name__])
 
 pay_api = PayApi(db)
+
+
+@celery.task
+def cycle_get_taker_order_job():
+    with app.app_context():
+        scheduler_api.monitor_maker_order(app)
 
 
 @celery.task

@@ -1,8 +1,7 @@
 # coding: utf-8
 
 
-class AtoSubmit(object):
-
+class AtoSubmit:
     def __init__(self, db):
         self.db = db
 
@@ -14,3 +13,4 @@ class AtoSubmit(object):
             self.db.session.rollback()
         else:
             self.db.session.commit()
+

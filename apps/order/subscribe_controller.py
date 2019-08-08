@@ -8,7 +8,7 @@ from apps.redis_client import RedisClient
 LOG =logging.getLogger(__name__)
 
 
-class SubScribeApi(object):
+class SubscribeApi(object):
     def __init__(self, db):
         self.db = db
         self.sub_client = RedisClient()
@@ -31,6 +31,9 @@ class SubScribeApi(object):
 
     def subscribe_process_exchange(self, pk, book_no=None, status=None):
         self.sub_client.subscribe_set_keyvalues(book_no, book_no)
+        if status == '':
+            expire_time = 5
+            self.sub_client.set_scribe_expired(book_no, expire_time)
         if status == '':
             expire_time = 5
             self.sub_client.set_scribe_expired(book_no, expire_time)

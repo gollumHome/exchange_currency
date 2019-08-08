@@ -82,8 +82,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@127.0.0.1:3306/school-saas'
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nsfocus@127.0.0.1:3306/work'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@139.196.78.95:3306/JK-exchange?charset=utf8mb4'
     REDIS_SERVER_HOST = '127.0.0.1'
 
 
@@ -107,19 +106,19 @@ class DevelopmentConfig(Config):
 #     REDIS_SERVER_HOST = '127.0.0.1'
 
 
-class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@139.196.78.95:3306/JK-exchange?charset=utf8mb4'
-    CERT_PATH = '/usr/local/www/cert'
-    SERVICE_CATE_ID = ''
-    CDN_STATIC_PATH = '/usr/local/xiaoyunbao/static/'
-    CDN_STATIC_URL = 'http://static.xiaoyunbao.com.cn/'
-    REDIS_SERVER_HOST = '127.0.0.1'
+# class ProductionConfig(Config):
+#     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@139.196.78.95:3306/JK-exchange?charset=utf8mb4'
+#     CERT_PATH = '/usr/local/www/cert'
+#     SERVICE_CATE_ID = ''
+#     CDN_STATIC_PATH = '/usr/local/xiaoyunbao/static/'
+#     CDN_STATIC_URL = 'http://static.xiaoyunbao.com.cn/'
+#     REDIS_SERVER_HOST = '127.0.0.1'
 
 
 config = {
-    'development': DevelopmentConfig,
+    #'development': DevelopmentConfig,
     # 'testing': TestingConfig,
     # 'testing2': Testing2Config,
     # 'production': ProductionConfig,
-    # 'default': DevelopmentConfig
+    'default': DevelopmentConfig
 }

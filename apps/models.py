@@ -1,45 +1,12 @@
-
 # coding: utf-8
-from sqlalchemy import Column, DECIMAL, Enum, ForeignKey, Index, JSON, String, Text, text
-from sqlalchemy.dialects.mysql import BIGINT, DATETIME, ENUM, INTEGER, LONGTEXT, SMALLINT, TINYINT, VARCHAR
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
-metadata = Base.metadata
+from . import db
+from sqlalchemy import Column, DECIMAL, Enum, Index, JSON, String, Text, text
+from sqlalchemy.dialects.mysql import BIGINT, ENUM, INTEGER, VARCHAR
 
 
-class MakerOrder(Base):
-    __tablename__ = 'maker_order'
-
-    id = Column(BIGINT(12), primary_key=True)
-    book_no = Column(String(64, u'utf8mb4_bin'), nullable=False, comment=u'????')
-    user_id = Column(BIGINT(12), nullable=False, comment=u'????id')
-    hold_currency = Column(String(10, u'utf8mb4_bin'), nullable=False, comment=u'??')
-    exchange_currency = Column(String(10, u'utf8mb4_bin'), nullable=False, comment=u'????')
-    hold_amount = Column(INTEGER(11), nullable=False, comment=u'????')
-    exchange_amount = Column(INTEGER(11), nullable=False, comment=u'????')
-    exchange_rate = Column(DECIMAL(10, 3), nullable=False, comment=u'??')
-    create_time = Column(INTEGER(11), nullable=False, comment=u'????')
-    status = Column(ENUM(u' pending', u'matched', u'canceled', u'sended', u'received', u'set_wallet', u'payed', u'disputed', u'complete'), nullable=False, server_default=text("'sended'"), comment=u'????')
-
-class TakerOrder(Base):
-    __tablename__ = 'taker_order'
-
-    id = Column(BIGINT(12), primary_key=True)
-    hold_currency = Column(String(10, u'utf8mb4_bin'), nullable=False, comment=u'??')
-    exchange_currency = Column(String(10, u'utf8mb4_bin'), nullable=False, comment=u'????')
-    hold_amount = Column(INTEGER(11), nullable=False, comment=u'????')
-    exchange_amount = Column(INTEGER(11), nullable=False, comment=u'????')
-    exchange_rate = Column(DECIMAL(10, 3), nullable=False, comment=u'??')
-    user_id = Column(BIGINT(12), nullable=False, comment=u'????id')
-    create_time = Column(INTEGER(11), nullable=False, comment=u'????')
-    status = Column(ENUM(u'canceled', u'matched', u'sended', u'received', u'set_wallet', u'payed', u'disputed', u'complete'), nullable=False, comment=u'????')
-    book_no = Column(String(64, u'utf8mb4_bin'), nullable=False, comment=u'????')
-
-
-class AccessToken(Base):
-    __tablename__ = 'access_token'
+class AccessToken(db.Model):
+    __tablename__ = 'Access_token'
 
     id = Column(BIGINT(20), primary_key=True)
     access_token = Column(String(530), nullable=False)
@@ -47,206 +14,167 @@ class AccessToken(Base):
     update_time = Column(INTEGER(11), nullable=False)
 
 
-class Account(Base):
-    __tablename__ = 'account'
+class Account(db.Model):
+    __tablename__ = 'Account'
 
     id = Column(BIGINT(20), primary_key=True)
     user_id = Column(BIGINT(20), nullable=False)
     balance = Column(INTEGER(11))
     unsettled = Column(INTEGER(11))
     available = Column(INTEGER(11))
-    status = Column(Enum(u'common', u'black'), nullable=False)
+    status = Column(Enum('common', 'black'), nullable=False)
 
 
-class AdminUser(Base):
-    __tablename__ = 'admin_user'
+class AdminUser(db.Model):
+    __tablename__ = 'Admin_User'
 
     id = Column(BIGINT(20), primary_key=True)
     nickname = Column(VARCHAR(60))
     password = Column(VARCHAR(255))
     head_url = Column(VARCHAR(255))
     access_token = Column(VARCHAR(1500))
-    type = Column(Enum(u'common'))
+    type = Column(Enum('common'))
     create_time = Column(INTEGER(11))
     update_time = Column(INTEGER(11))
     login_time = Column(INTEGER(11))
 
 
-class Advert(Base):
-    __tablename__ = 'advert'
+class Advert(db.Model):
+    __tablename__ = 'Advert'
 
     id = Column(BIGINT(20), primary_key=True)
-    type = Column(Enum(u'merchant', u'activity', u'activityPopup'), comment=u'????')
-    image_url = Column(VARCHAR(1024), comment=u'????')
-    target_url = Column(VARCHAR(1024), comment=u'????')
-    number = Column(INTEGER(11), nullable=False, comment=u'??')
-    status = Column(Enum(u'del', u'normal'), comment=u'??')
-    create_time = Column(INTEGER(11), comment=u'????')
-    update_time = Column(INTEGER(11), comment=u'????')
+    type = Column(Enum('merchant', 'activity', 'activityPopup'), comment='广告类型')
+    image_url = Column(VARCHAR(1024), comment='图片地址')
+    target_url = Column(VARCHAR(1024), comment='跳转地址')
+    number = Column(INTEGER(11), nullable=False, comment='排序')
+    status = Column(Enum('del', 'normal'), comment='状态')
+    create_time = Column(INTEGER(11), comment='创建时间')
+    update_time = Column(INTEGER(11), comment='修改时间')
 
 
-class AuthGroup(Base):
-    __tablename__ = 'auth_group'
-
-    id = Column(INTEGER(11), primary_key=True)
-    name = Column(String(80), nullable=False, unique=True)
-
-
-class AuthUser(Base):
-    __tablename__ = 'auth_user'
-
-    id = Column(INTEGER(11), primary_key=True)
-    password = Column(String(128), nullable=False)
-    last_login = Column(DATETIME(fsp=6))
-    is_superuser = Column(TINYINT(1), nullable=False)
-    username = Column(String(150), nullable=False, unique=True)
-    first_name = Column(String(30), nullable=False)
-    last_name = Column(String(30), nullable=False)
-    email = Column(String(254), nullable=False)
-    is_staff = Column(TINYINT(1), nullable=False)
-    is_active = Column(TINYINT(1), nullable=False)
-    date_joined = Column(DATETIME(fsp=6), nullable=False)
-
-
-class Barrage(Base):
-    __tablename__ = 'barrage'
+class Barrage(db.Model):
+    __tablename__ = 'Barrage'
 
     id = Column(BIGINT(20), primary_key=True)
-    type = Column(Enum(u'reward', u'exchange', u'register'), nullable=False)
+    type = Column(Enum('reward', 'exchange', 'register'), nullable=False)
     user_id = Column(BIGINT(20))
     content = Column(VARCHAR(255))
     nickname = Column(VARCHAR(120))
     head_url = Column(VARCHAR(255))
-    status = Column(Enum(u'del', u'normal'))
+    status = Column(Enum('del', 'normal'))
     create_time = Column(INTEGER(11))
 
 
-class Blog(Base):
-    __tablename__ = 'blog'
+class Blog(db.Model):
+    __tablename__ = 'Blog'
 
     id = Column(BIGINT(12), primary_key=True)
-    title = Column(String(140, u'utf8mb4_bin'))
-    content = Column(Text(collation=u'utf8mb4_bin'))
-    status = Column(ENUM(u'del', u'normal'))
+    title = Column(String(140, 'utf8mb4_bin'))
+    content = Column(Text(collation='utf8mb4_bin'))
+    status = Column(ENUM('del', 'normal'))
     create_time = Column(INTEGER(11))
     update_time = Column(INTEGER(11))
 
 
-class BookSubject(Base):
-    __tablename__ = 'book_subject'
+class BookSubject(db.Model):
+    __tablename__ = 'Book_Subject'
 
     id = Column(BIGINT(20), primary_key=True)
     user_id = Column(BIGINT(20), nullable=False)
     subject_describe = Column(JSON)
-    subject = Column(Enum(u'charge', u'service_fee', u'withdraw', u'reward'), nullable=False)
+    subject = Column(Enum('charge', 'service_fee', 'withdraw', 'reward'), nullable=False)
     transaction_id = Column(String(50), nullable=False)
     amount = Column(INTEGER(11), nullable=False)
     create_time = Column(INTEGER(11), nullable=False)
 
 
-class Comment(Base):
-    __tablename__ = 'comments'
+class Comment(db.Model):
+    __tablename__ = 'Comments'
 
     id = Column(INTEGER(11), primary_key=True)
     activity_id = Column(BIGINT(12))
     comment = Column(String(200))
     user_id = Column(INTEGER(11))
-    type = Column(Enum(u'activity', u'course', u'merchant'))
-    status = Column(Enum(u'pass', u'pending', u'del'))
+    type = Column(Enum('activity', 'course', 'merchant'))
+    status = Column(Enum('pass', 'pending', 'del'))
     create_time = Column(INTEGER(11))
     merchant_id = Column(INTEGER(11))
 
 
-class ConfigParam(Base):
-    __tablename__ = 'config_params'
+class ConfigParam(db.Model):
+    __tablename__ = 'Config_Params'
 
     id = Column(INTEGER(11), primary_key=True)
     param_name = Column(VARCHAR(120), nullable=False)
     set_value = Column(VARCHAR(120), nullable=False)
 
 
-class CreditCharge(Base):
-    __tablename__ = 'credit_charge'
+class CreditCharge(db.Model):
+    __tablename__ = 'Credit_Charge'
 
     id = Column(BIGINT(20), primary_key=True)
     user_id = Column(BIGINT(20), nullable=False)
     order_id = Column(BIGINT(20))
-    type = Column(Enum(u'gold', u'silver', u'diamond'))
+    type = Column(Enum('gold', 'silver', 'diamond'))
     amount = Column(INTEGER(11), nullable=False)
     create_time = Column(INTEGER(11), nullable=False)
-    status = Column(Enum(u'canceled', u'common'), nullable=False, server_default=text("'common'"))
+    status = Column(Enum('canceled', 'common'), nullable=False, server_default=text("'common'"))
 
 
-class CreditPackage(Base):
-    __tablename__ = 'credit_package'
-
-    id = Column(BIGINT(20), primary_key=True)
-    discount_price = Column(INTEGER(11), nullable=False, comment=u'???')
-    title = Column(VARCHAR(150), comment=u'????')
-    type = Column(Enum(u'gold', u'silver', u'diamond'), nullable=False, comment=u'????')
-    original_price = Column(INTEGER(11), nullable=False, comment=u'??')
-    amount = Column(INTEGER(10), comment=u'?????')
-
-
-class Customerservice(Base):
-    __tablename__ = 'customerservice'
+class CreditPackage(db.Model):
+    __tablename__ = 'Credit_Package'
 
     id = Column(BIGINT(20), primary_key=True)
-    merchant_id = Column(BIGINT(20), comment=u'?? id')
-    hotline = Column(VARCHAR(20), comment=u'????')
-    url = Column(VARCHAR(1024), comment=u'?????')
-    type = Column(Enum(u'system', u'merchant'), comment=u'????')
-    status = Column(Enum(u'del', u'normal'), comment=u'??')
-    create_time = Column(INTEGER(11), nullable=False, comment=u'????')
-    update_time = Column(INTEGER(11), nullable=False, comment=u'????')
+    discount_price = Column(INTEGER(11), nullable=False, comment='折扣价')
+    title = Column(VARCHAR(150), comment='套餐名称')
+    type = Column(Enum('gold', 'silver', 'diamond'), nullable=False, comment='套餐类型')
+    original_price = Column(INTEGER(11), nullable=False, comment='原价')
+    amount = Column(INTEGER(10), comment='信用币数量')
 
 
-class DjangoContentType(Base):
-    __tablename__ = 'django_content_type'
-    __table_args__ = (
-        Index('django_content_type_app_label_model_76bd3d3b_uniq', 'app_label', 'model', unique=True),
-    )
+class CustomerService(db.Model):
+    __tablename__ = 'CustomerService'
 
-    id = Column(INTEGER(11), primary_key=True)
-    app_label = Column(String(100), nullable=False)
-    model = Column(String(100), nullable=False)
-
-
-class DjangoMigration(Base):
-    __tablename__ = 'django_migrations'
-
-    id = Column(INTEGER(11), primary_key=True)
-    app = Column(String(255), nullable=False)
-    name = Column(String(255), nullable=False)
-    applied = Column(DATETIME(fsp=6), nullable=False)
+    id = Column(BIGINT(20), primary_key=True)
+    merchant_id = Column(BIGINT(20), comment='商户 id')
+    hotline = Column(VARCHAR(20), comment='客服热线')
+    url = Column(VARCHAR(1024), comment='客服二维码')
+    type = Column(Enum('system', 'merchant'), comment='客服类型')
+    status = Column(Enum('del', 'normal'), comment='状态')
+    create_time = Column(INTEGER(11), nullable=False, comment='创建时间')
+    update_time = Column(INTEGER(11), nullable=False, comment='修改时间')
 
 
-class DjangoSession(Base):
-    __tablename__ = 'django_session'
-
-    session_key = Column(String(40), primary_key=True)
-    session_data = Column(LONGTEXT, nullable=False)
-    expire_date = Column(DATETIME(fsp=6), nullable=False, index=True)
-
-
-class ExchangeProgres(Base):
-    __tablename__ = 'exchange_progress'
+class ExchangeProgres(db.Model):
+    __tablename__ = 'Exchange_Progress'
 
     id = Column(BIGINT(12), primary_key=True)
-    book_no = Column(String(64, u'utf8mb4_bin'), nullable=False, comment=u'????')
-    user_id = Column(BIGINT(12), nullable=False, comment=u'??id')
-    status = Column(ENUM(u'canceled', u'matched', u'sended', u'received', u'set_wallet', u'payed', u'disputed', u'complete'), nullable=False, comment=u'??')
-    create_time = Column(INTEGER(11), nullable=False, comment=u'????')
-    expire_time = Column(INTEGER(11), comment=u'????')
-    extend_remark = Column(JSON, comment=u'??')
-    entrust_type = Column(ENUM(u'maker', u'taker'))
+    book_no = Column(String(64, 'utf8mb4_bin'), nullable=False, comment='挂单编号')
+    user_id = Column(BIGINT(12), nullable=False, comment='用户id')
+    status = Column(ENUM('canceled', 'matched', 'sended', 'received', 'set_wallet', 'payed', 'disputed', 'complete'), nullable=False, comment='状态')
+    create_time = Column(INTEGER(11), nullable=False, comment='创建时间')
+    expire_time = Column(INTEGER(11), comment='过期时间')
+    extend_remark = Column(JSON, comment='备注')
+    entrust_type = Column(ENUM('maker', 'taker'))
 
 
+class MakerOrder(db.Model):
+    __tablename__ = 'Maker_Order'
+
+    id = Column(BIGINT(12), primary_key=True)
+    book_no = Column(String(64, 'utf8mb4_bin'), nullable=False, comment='挂单编号')
+    user_id = Column(BIGINT(12), nullable=False, comment='挂单用户id')
+    hold_currency = Column(String(10, 'utf8mb4_bin'), nullable=False, comment='本币')
+    exchange_currency = Column(String(10, 'utf8mb4_bin'), nullable=False, comment='换汇货币')
+    hold_amount = Column(INTEGER(11), nullable=False, comment='本币金额')
+    exchange_amount = Column(INTEGER(11), nullable=False, comment='换汇金额')
+    exchange_rate = Column(DECIMAL(10, 3), nullable=False, comment='汇率')
+    create_time = Column(INTEGER(11), nullable=False, comment='创建时间')
+    status = Column(ENUM('canceled', 'matched', 'pending', 'sended', 'received', 'set_wallet', 'payed', 'disputed', 'complete'), nullable=False, comment='挂单状态')
 
 
-
-class Message(Base):
-    __tablename__ = 'message'
+class Message(db.Model):
+    __tablename__ = 'Message'
 
     id = Column(BIGINT(20), primary_key=True)
     sender_id = Column(BIGINT(20))
@@ -254,13 +182,13 @@ class Message(Base):
     receiver_id = Column(BIGINT(20))
     receiver_name = Column(String(60))
     content = Column(JSON)
-    message_type = Column(Enum(u'enroll', u'notify', u'reward'))
-    status = Column(Enum(u'readed', u'unread'))
+    message_type = Column(Enum('enroll', 'notify', 'reward'))
+    status = Column(Enum('readed', 'unread'))
     create_time = Column(INTEGER(11))
 
 
-class Notice(Base):
-    __tablename__ = 'notice'
+class Notice(db.Model):
+    __tablename__ = 'Notice'
 
     id = Column(BIGINT(20), primary_key=True)
     title = Column(VARCHAR(100))
@@ -268,8 +196,8 @@ class Notice(Base):
     create_time = Column(INTEGER(11))
 
 
-class ShareChain(Base):
-    __tablename__ = 'share_chain'
+class ShareChain(db.Model):
+    __tablename__ = 'Share_Chain'
     __table_args__ = (
         Index('index_sid_uid_aid', 'share_id', 'invited_id', unique=True),
     )
@@ -280,20 +208,34 @@ class ShareChain(Base):
     create_time = Column(INTEGER(11))
 
 
-class Tag(Base):
-    __tablename__ = 'tag'
+class Tag(db.Model):
+    __tablename__ = 'Tag'
 
     id = Column(BIGINT(20), primary_key=True)
     name = Column(VARCHAR(20), nullable=False)
-    status = Column(Enum(u'del', u'normal'))
+    status = Column(Enum('del', 'normal'))
     number = Column(INTEGER(11), nullable=False)
     create_time = Column(INTEGER(11))
     update_time = Column(INTEGER(11))
 
 
+class TakerOrder(db.Model):
+    __tablename__ = 'Taker_Order'
 
-class TelVerifycode(Base):
-    __tablename__ = 'tel_verifycode'
+    id = Column(BIGINT(12), primary_key=True)
+    hold_currency = Column(String(10, 'utf8mb4_bin'), nullable=False, comment='本币')
+    exchange_currency = Column(String(10, 'utf8mb4_bin'), nullable=False, comment='换汇货币')
+    hold_amount = Column(INTEGER(11), nullable=False, comment='本币金额')
+    exchange_amount = Column(INTEGER(11), nullable=False, comment='换汇金额')
+    exchange_rate = Column(DECIMAL(10, 3), nullable=False, comment='汇率')
+    user_id = Column(BIGINT(12), nullable=False, comment='吃单用户id')
+    create_time = Column(INTEGER(11), nullable=False, comment='创建时间')
+    status = Column(ENUM('canceled', 'matched', 'sended', 'received', 'set_wallet', 'payed', 'disputed', 'complete'), nullable=False, comment='吃单状态')
+    book_no = Column(String(64, 'utf8mb4_bin'), nullable=False, comment='挂单编号')
+
+
+class TelVerifyCode(db.Model):
+    __tablename__ = 'Tel_VerifyCode'
 
     id = Column(INTEGER(11), primary_key=True)
     telephone = Column(String(64), unique=True)
@@ -301,45 +243,45 @@ class TelVerifycode(Base):
     create_time = Column(INTEGER(11), index=True)
     dead_line = Column(INTEGER(11), index=True)
     usable = Column(INTEGER(11))
-    verify_type = Column(Enum(u'mch_register', u'add_phone', u'reset_pass', u'withdraw'), index=True)
+    verify_type = Column(Enum('mch_register', 'add_phone', 'reset_pass', 'withdraw'), index=True)
 
 
-class Transaction(Base):
-    __tablename__ = 'transaction'
+class Transaction(db.Model):
+    __tablename__ = 'Transaction'
 
     id = Column(INTEGER(11), primary_key=True)
     book_no = Column(String(120), unique=True)
     exchange_amount = Column(INTEGER(11))
     hold_amount = Column(INTEGER(11), index=True)
-    send_wallets = Column(Enum(u'alipay', u'paypal', u'zelle', u'wxpay'))
-    received_wallets = Column(Enum(u'alipay', u'paypal', u'zelle', u'wxpay'), index=True)
+    send_wallets = Column(Enum('alipay', 'paypal', 'zelle', 'wxpay'))
+    received_wallets = Column(Enum('alipay', 'paypal', 'zelle', 'wxpay'), index=True)
     user_id = Column(BIGINT(12), nullable=False)
     remark = Column(String(64))
     create_time = Column(INTEGER(11))
 
 
-class User(Base):
-    __tablename__ = 'user'
+class User(db.Model):
+    __tablename__ = 'User'
 
     id = Column(INTEGER(11), primary_key=True)
-    username = Column(VARCHAR(120), comment=u'???')
-    head_url = Column(String(255), comment=u'??')
-    telephone = Column(String(12), comment=u'??')
+    username = Column(VARCHAR(120), comment='用户名')
+    head_url = Column(String(255), comment='头像')
+    telephone = Column(String(12), comment='手机')
     access_token = Column(String(1500))
-    email = Column(String(120), comment=u'????')
-    ID_verify = Column(JSON, comment=u'?????')
+    email = Column(String(120), comment='登录邮箱')
+    ID_verify = Column(JSON, comment='身份证认证')
     expire_time = Column(INTEGER(11), index=True)
     login_time = Column(INTEGER(11), index=True)
-    status = Column(Enum(u'normal', u'black', u'beVerified', u'rejected'), index=True)
-    Passport_verify = Column(JSON, comment=u'????')
-    verify_channel = Column(Enum(u'passport', u'ID'), comment=u'????')
-    verify_feedback = Column(JSON, comment=u'????')
-    invite_code = Column(String(32), comment=u'???')
-    additional_emails = Column(String(120), comment=u'????')
+    status = Column(Enum('normal', 'black', 'beVerified', 'rejected'), index=True)
+    Passport_verify = Column(JSON, comment='护照认证')
+    verify_channel = Column(Enum('passport', 'ID'), comment='认证类型')
+    verify_feedback = Column(JSON, comment='认证结果')
+    invite_code = Column(String(32), comment='邀请码')
+    additional_emails = Column(String(120), comment='补充邮箱')
 
 
-class UserReward(Base):
-    __tablename__ = 'user_reward'
+class UserReward(db.Model):
+    __tablename__ = 'User_Reward'
 
     id = Column(BIGINT(20), primary_key=True)
     user_id = Column(BIGINT(20), nullable=False)
@@ -347,13 +289,13 @@ class UserReward(Base):
     title = Column(VARCHAR(150))
     amount = Column(INTEGER(11), nullable=False)
     order_id = Column(BIGINT(20), unique=True)
-    status = Column(Enum(u'bereward', u'canceled', u'rewarded'))
+    status = Column(Enum('bereward', 'canceled', 'rewarded'))
     finish_time = Column(INTEGER(11))
     create_time = Column(INTEGER(11), nullable=False)
 
 
-class Wallet(Base):
-    __tablename__ = 'wallets'
+class Wallet(db.Model):
+    __tablename__ = 'Wallets'
 
     id = Column(BIGINT(12), primary_key=True)
     cny_wallets = Column(JSON)
@@ -361,75 +303,3 @@ class Wallet(Base):
     cad_wallets = Column(JSON)
     gbp_wallets = Column(JSON)
     user_id = Column(BIGINT(12), nullable=False)
-
-
-class AuthPermission(Base):
-    __tablename__ = 'auth_permission'
-    __table_args__ = (
-        Index('auth_permission_content_type_id_codename_01ab375a_uniq', 'content_type_id', 'codename', unique=True),
-    )
-
-    id = Column(INTEGER(11), primary_key=True)
-    name = Column(String(255), nullable=False)
-    content_type_id = Column(ForeignKey(u'django_content_type.id'), nullable=False)
-    codename = Column(String(100), nullable=False)
-
-    content_type = relationship(u'DjangoContentType')
-
-
-class AuthUserGroup(Base):
-    __tablename__ = 'auth_user_groups'
-    __table_args__ = (
-        Index('auth_user_groups_user_id_group_id_94350c0c_uniq', 'user_id', 'group_id', unique=True),
-    )
-
-    id = Column(INTEGER(11), primary_key=True)
-    user_id = Column(ForeignKey(u'auth_user.id'), nullable=False)
-    group_id = Column(ForeignKey(u'auth_group.id'), nullable=False, index=True)
-
-    group = relationship(u'AuthGroup')
-    user = relationship(u'AuthUser')
-
-
-class DjangoAdminLog(Base):
-    __tablename__ = 'django_admin_log'
-
-    id = Column(INTEGER(11), primary_key=True)
-    action_time = Column(DATETIME(fsp=6), nullable=False)
-    object_id = Column(LONGTEXT)
-    object_repr = Column(String(200), nullable=False)
-    action_flag = Column(SMALLINT(5), nullable=False)
-    change_message = Column(LONGTEXT, nullable=False)
-    content_type_id = Column(ForeignKey(u'django_content_type.id'), index=True)
-    user_id = Column(ForeignKey(u'auth_user.id'), nullable=False, index=True)
-
-    content_type = relationship(u'DjangoContentType')
-    user = relationship(u'AuthUser')
-
-
-class AuthGroupPermission(Base):
-    __tablename__ = 'auth_group_permissions'
-    __table_args__ = (
-        Index('auth_group_permissions_group_id_permission_id_0cd325b0_uniq', 'group_id', 'permission_id', unique=True),
-    )
-
-    id = Column(INTEGER(11), primary_key=True)
-    group_id = Column(ForeignKey(u'auth_group.id'), nullable=False)
-    permission_id = Column(ForeignKey(u'auth_permission.id'), nullable=False, index=True)
-
-    group = relationship(u'AuthGroup')
-    permission = relationship(u'AuthPermission')
-
-
-class AuthUserUserPermission(Base):
-    __tablename__ = 'auth_user_user_permissions'
-    __table_args__ = (
-        Index('auth_user_user_permissions_user_id_permission_id_14a6b632_uniq', 'user_id', 'permission_id', unique=True),
-    )
-
-    id = Column(INTEGER(11), primary_key=True)
-    user_id = Column(ForeignKey(u'auth_user.id'), nullable=False)
-    permission_id = Column(ForeignKey(u'auth_permission.id'), nullable=False, index=True)
-
-    permission = relationship(u'AuthPermission')
-    user = relationship(u'AuthUser')

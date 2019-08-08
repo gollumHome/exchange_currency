@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from qcloud_cos import CosConfig
-from qcloud_cos import cos_client
+# from qcloud_cos import
+# from qcloud_cos import Cos
 import sys
 import logging
 
@@ -24,9 +24,9 @@ class TencentOss:
         self.Region = app.config['OSS_REGION']
         self.SecretId = app.config['OSS_ACCESSKEY_ID']
         self.SecretKey = app.config['OSS_ACCESSKEY_SECRET']
-        self.config = CosConfig(Region=self.Region, SecretId=self.SecretId, SecretKey=self.SecretKey,
-                                Token=None, Scheme='https')
-        self.client = CosS3Client(self.config)
+        # self.config = CosConfig(Region=self.Region, SecretId=self.SecretId, SecretKey=self.SecretKey,
+        #                         Token=None, Scheme='https')
+        # self.client = CosS3Client(self.config)
 
     def _upload_to_public(self,bucket, file_name, file_bytes):
         # Endpoint

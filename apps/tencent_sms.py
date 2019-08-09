@@ -27,7 +27,7 @@ class TencentSms(object):
     def send_single(self, phone_number, content):
         try:
             result = self.ssender.send(0, 86, phone_number, content, extend="", ext="")
-            print(result)
+            return result
         except HTTPError as e:
             print(e)
         except Exception as e:

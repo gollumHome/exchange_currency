@@ -2,37 +2,50 @@
 
 
 TAKER_ORDER_STATUS = {
-    "matched": "1",
-    "set_wallet": "2",
-    "sended": "3",
-    "received": "4",
-    "disputed": "5",
-    "complete": "6",
-    "canceled": "7"
+    "matched": "matched",
+    "set_wallet": "set_wallet",
+    "sended": "sended",
+    "received": "received",
+    "disputed": "disputed",
+    "complete": "complete",
+    "canceled": "canceled"
+}
+
+MAKER_ORDER_STATUS = {
+    "pending":"pending",
+    "createded": "createded",
+    "matched": "matched",
+    "set_wallet": "set_wallet",
+    "sended": "sended",
+    "received": "received",
+    "disputed": "disputed",
+    "complete": "complete",
+    "canceled": "canceled"
 }
 
 
-
 EXCHANGE_PROCESS_STATUS = {
-    'canceled': "2",
-    'matched' : "1",
-    'sended': "3",
-    'received': "4",
-    'set_wallet': "1",
-    'payed': "6",
-    'disputed': "7",
-    'complete': "8"
+    "pending": "pending",
+    'canceled': "canceled",
+    'matched': "matched",
+    'sended': "sended",
+    'received': "received",
+    'set_wallet': "set_wallet",
+    'payed': "payed",
+    'disputed': "disputed",
+    'complete': "complete"
 }
 
 
 PROCESS_STATUS_EXPIRE_TIME = {
+    #"matched": 10 * 60,
     "pending": 60 * 60,
-    "matched": 10 * 60,
+    "matched": 5,
     "set_wallet": 60 * 60,
     "sended": 18 * 60 * 60
 }
 
 ENTRUST_TYPE = {
-    "maker": "1",
-    "taker": "2"
+    "maker": "maker",
+    "taker": "taker"
 }

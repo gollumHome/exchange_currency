@@ -14,6 +14,8 @@ from apps.utils import Utils
 from .constant import TAKER_ORDER_STATUS
 
 from apps.models import MakerOrder,TakerOrder
+
+from apps.order.exchange_process_controller import ProcesApi
 from apps.models import  User
 
 LOG =logging.getLogger(__name__)
@@ -65,12 +67,11 @@ class OrderApi(object):
                                          status=status)
             self.db.session.add(maker_order_obj)
             self.db.session.flush()
-            self.db.session.commit()
-            return {"code": "200", "book_no": book_no}
+            return maker_order_obj.id
         except Exception as e:
             self.db.session.rollback()
             LOG.error("xx"% print_exc())
-        return {"code": "500", "info": "订单生产异常"}
+        return None
 
     def update_taker_related_maker_order(self, book_no, stauts):
         try:
@@ -78,10 +79,17 @@ class OrderApi(object):
             if obj:
                 obj.status = stauts
             self.db.session.flush()
-            return True
         except Exception as e:
             LOG.error("update related maker order err%s" % print_exc())
-            return False
+
+    def update_maker_related_taker_order(self, book_no, stauts):
+        try:
+            obj = TakerOrder.query.filter_by(book_no=book_no).first()
+            if obj:
+                obj.status = stauts
+            self.db.session.flush()
+        except Exception as e:
+            LOG.error("update related maker order err%s" % print_exc())
 
     def create_taker_order(self, user_id, book_no, hold_currency,
                            hold_amount, exchange_currency,
@@ -110,10 +118,19 @@ class OrderApi(object):
             if obj:
                 obj.status = status
             self.db.session.flush()
-            return True
         except Exception as e:
             LOG.error("create taker order err%s" % print_exc())
-            return False
+
+    def update_maker_order(self, pk, status):
+        try:
+            obj = MakerOrder.query.filter_by(id=pk).first()
+            if obj:
+                obj.status = status
+            self.db.session.flush()
+        except Exception as e:
+            LOG.error("create taker order err%s" % print_exc())
+
+
 
 
 

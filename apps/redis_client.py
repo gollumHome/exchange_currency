@@ -17,20 +17,22 @@ class RedisClient:
     # def init_from_app(self, app):
     #     self.redis_client = redis.Redis(host=app.config['REDIS_SERVER_HOST'], port=6379, db=0)
 
-
     def get_scribe_obj(self):
         return self.redis_client.pubsub()
 
     # key weiyi
-    def set_scribe_expired(self, book_no, expire_time):
-        self.redis_client.expire(book_no, expire_time)
+    def set_scribe_expired(self, pk, expire_time):
+        try:
+            return self.redis_client.expire(pk, expire_time)
+        except:
+            logger.error(print_exc)
 
     def subscribe_set_keyvalues(self, key, value):
-        self.redis_client.set(key, value)
-
-    def init_from_app(self):
-        self.redis_client = redis.Redis(host='127.0.0.1', port=6379, db=0)
-        return self.redis_client
+        try:
+            return self.redis_client.set(key, value)
+        except:
+            logger.error(print_exc)
+            return None
 
     def add_monitor_porcess_order(self, user, activity_id):
         try:

@@ -9,7 +9,7 @@ from flask import jsonify, request
 import uuid
 import logging
 from apps.order import ov
-
+from flask import jsonify, request
 from apps.order.order_controller import OrderApi
 from apps.models import *
 from apps.tencent_sms import TencentSms
@@ -29,5 +29,27 @@ logger = logging.getLogger(__name__)
 def taker_order_exchange():
     pk = request.args.get('pk')
     obj = TakerOrder.query.filter(id=pk).first()
+    view_data = dict()
     if obj:
-        return obj.exchange_amount ** 0.08
+        view_data['code'] = 200
+        view_data['info'] = 'service_fee'
+        view_data['data'] = {'fee': obj.exchange_amount ** 0.08 }
+        return jsonify(view_data)
+    view_data['code'] = 500
+    view_data['info'] = 'err '
+    return jsonify(view_data)
+
+
+@ov.route('/maker_order/fee', methods=['GET'])
+def taker_order_exchange():
+    pk = request.args.get('pk')
+    obj = MakerOrder.query.filter(id=pk).first()
+    view_data = dict()
+    if obj:
+        view_data['code'] = 200
+        view_data['info'] = 'service_fee'
+        view_data['data'] = {'fee': obj.exchange_amount ** 0.08 }
+        return jsonify(view_data)
+    view_data['code'] = 500
+    view_data['info'] = 'err '
+    return jsonify(view_data)

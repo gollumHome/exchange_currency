@@ -67,15 +67,25 @@ class ProcesApi(object):
 
     def update_taker_related_porcess(self, book_no, entrust_type, status):
         try:
-            obj =ExchangeProgres.query.filter_by(book_no=book_no,
-                                                 entrust_type=entrust_type).first()
+            obj = self.db.session.query(ExchangeProgres).\
+                filter(ExchangeProgres.book_no == book_no,
+                ExchangeProgres.entrust_type == entrust_type).first()
             if obj:
                 obj.status = status
             self.db.session.flush()
-            return True
         except Exception as e:
             LOG.error("update related maker order err%s" % print_exc())
-            return False
+
+    def update_maker_related_porcess(self, book_no, entrust_type, status):
+        try:
+            obj = self.db.session.query(ExchangeProgres).\
+                filter(ExchangeProgres.book_no == book_no,
+                ExchangeProgres.entrust_type == entrust_type).first()
+            if obj:
+                obj.status = status
+            self.db.session.flush()
+        except Exception as e:
+            LOG.error("update related maker order err%s" % print_exc())
 
     def confirm_service_charge(self, book_no, entrust_type):
         try:
@@ -110,6 +120,7 @@ class ProcesApi(object):
                 obj.status = EXCHANGE_PROCESS_STATUS['set_wallet']
                 obj.extend_remark = data
             self.db.session.flush()
+            self.db.session.commit()
             return True
         except Exception as e:
             LOG.error("create taker order err%s" % print_exc())

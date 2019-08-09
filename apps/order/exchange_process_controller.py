@@ -5,7 +5,7 @@ from traceback import print_exc
 from apps.models import *
 import time
 from decimal import Decimal
-from .constant import TAKER_ORDER_STATUS
+from .constant import TAKER_ORDER_STATUS,EXCHANGE_PROCESS_STATUS
 
 from apps.tencent_sms import TencentSms
 
@@ -14,7 +14,7 @@ LOG =logging.getLogger(__name__)
 
 class ProcesApi(object):
     def __init__(self, db):
-        self.db = db  #
+        self.db = db
 
     def init_from_db(self, db):
         self.db = db
@@ -22,7 +22,6 @@ class ProcesApi(object):
     def create_exchange_process(self, book_no,
                                 user_id,
                                 status,
-                                extend_remark,
                                 entrust_type):
         try:
             expire_time = 0
@@ -36,16 +35,13 @@ class ProcesApi(object):
                                               status=status,
                                               create_time=now_time,
                                               expire_time=expire_time,
-                                              extend_remark=extend_remark,
-                                              entrust_type=entrust_type)
+                                              entrust_type=1)
             self.db.session.add(taker_order_obj)
             self.db.session.flush()
-            self.db.session.commit()
-            return {"code": "200", "book_no": book_no}
+            return True
         except Exception as e:
-            self.db.session.rollback()
             LOG.error("create taker order err%s" % print_exc())
-        return {"code": "500", "info": "订单生产异常"}
+            return False
 
     def update_exchange_process(self, pk, stauts):
         try:
@@ -69,9 +65,10 @@ class ProcesApi(object):
             LOG.error("update exchange process  err%s" % print_exc())
             return {}
 
-    def update_taker_related_porcess(self, book_no,status):
+    def update_taker_related_porcess(self, book_no, entrust_type, status):
         try:
-            obj =ExchangeProgres.query.filter_by(book_no=book_no).first()
+            obj =ExchangeProgres.query.filter_by(book_no=book_no,
+                                                 entrust_type=entrust_type).first()
             if obj:
                 obj.status = status
             self.db.session.flush()
@@ -105,3 +102,25 @@ class ProcesApi(object):
     # monitor process whetheater expired
     def motior_process_task(self, key):
         pass
+
+    def add_exchange_wallet(self, pk, data):
+        try:
+            obj = ExchangeProgres.query.filter_by(id=pk).first()
+            if obj:
+                obj.status = EXCHANGE_PROCESS_STATUS['set_wallet']
+                obj.extend_remark = data
+            self.db.session.flush()
+            return True
+        except Exception as e:
+            LOG.error("create taker order err%s" % print_exc())
+            return False
+
+    def get_exchange_process_obj(self,book_no,entrust_type):
+        try:
+            obj = ExchangeProgres.query.filter_by(book_no=book_no,
+                                                  entrust_type=entrust_type).first()
+            if obj:
+               return obj
+        except Exception as e:
+            LOG.error("create taker order err%s" % print_exc())
+            return None

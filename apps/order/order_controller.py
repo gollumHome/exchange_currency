@@ -28,10 +28,10 @@ class OrderApi(object):
 
     @staticmethod
     def currency_exchange(hold_currency, hold_amount,
-                          exchange_currency,
-                          exchange_rate):
+                          exchange_currency
+                          ):
         if hold_currency == '' and exchange_currency == '':
-            exchange_amount = hold_amount * exchange_rate
+            exchange_amount = hold_amount * 0.08
             return exchange_amount
         return 0
 
@@ -72,7 +72,7 @@ class OrderApi(object):
             LOG.error("xx"% print_exc())
         return {"code": "500", "info": "订单生产异常"}
 
-    def update_taker_related_maker_order(self, book_no,stauts):
+    def update_taker_related_maker_order(self, book_no, stauts):
         try:
             obj = MakerOrder.query.filter_by(book_no=book_no).first()
             if obj:
@@ -99,12 +99,10 @@ class OrderApi(object):
                                          status=status)
             self.db.session.add(taker_order_obj)
             self.db.session.flush()
-            self.db.session.commit()
-            return {"code": "200", "book_no": book_no}
+            return True
         except Exception as e:
-            self.db.session.rollback()
             LOG.error("create taker order err%s" % print_exc())
-        return {"code": "500", "info": "订单生产异常"}
+            return False
 
     def update_taker_order(self, pk, status):
         try:
@@ -116,6 +114,9 @@ class OrderApi(object):
         except Exception as e:
             LOG.error("create taker order err%s" % print_exc())
             return False
+
+
+
 
 
 

@@ -25,4 +25,6 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     logger.info('系统准备启动了::: ')
     app.secret_key = 'x-ci-dm'
+    print(app.url_map)
     app.run(host='127.0.0.1', port=8000)
+

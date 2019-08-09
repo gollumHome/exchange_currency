@@ -5,7 +5,6 @@ import redis
 import json
 from traceback import print_exc
 
-from apps.models import *
 logger = logging.getLogger()
 
 

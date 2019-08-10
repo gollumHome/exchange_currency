@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import enum
 from decimal import Decimal
-from .constant import TAKER_ORDER_STATUS,\
+from apps.order.constant import TAKER_ORDER_STATUS,\
     PROCESS_STATUS_EXPIRE_TIME, ENTRUST_TYPE,\
     EXCHANGE_PROCESS_STATUS
 from apps import db
@@ -41,7 +41,7 @@ def taker_order_exchange():
 
 
 @ov.route('/maker_order/fee', methods=['GET'])
-def taker_order_exchange():
+def maker_order_exchange():
     pk = request.args.get('pk')
     obj = MakerOrder.query.filter(id=pk).first()
     view_data = dict()

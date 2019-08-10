@@ -7,7 +7,10 @@ import jwt
 from flask import jsonify
 
 from apps import db
-from apps.models import User, AdminUser, Merchant
+from apps.models import User, AdminUser
+from apps.redis_client import RedisClient
+
+redis_api = RedisClient()
 
 
 class Auth(object):
@@ -21,6 +24,7 @@ class Auth(object):
         :return: string
         """
         try:
+            expired_time = datetime.datetime.utcnow() + timedelta
             payload = {
                 'exp': datetime.datetime.utcnow() + timedelta,
                 'iat': datetime.datetime.utcnow(),
@@ -30,11 +34,8 @@ class Auth(object):
                     'login_time': login_time
                 }
             }
-            return jwt.encode(
-                payload,
-                SECRET_KEY,
-                algorithm='HS256'
-            )
+            token = jwt.encode( payload, SECRET_KEY, algorithm='HS256')
+            redis_api.set_scribe_expired(token, expired_time)
         except Exception as e:
             return e
 
@@ -49,7 +50,12 @@ class Auth(object):
             payload = jwt.decode(auth_token, SECRET_KEY)
             # 取消过期时间验证
             # payload = jwt.decode(auth_token, config.SECRET_KEY, options={'verify_exp': False})
-            if 'data' in payload and 'id' in payload['data']:
+            valid_token = jwt.encode(
+                payload,
+                SECRET_KEY,
+                algorithm='HS256'
+            )
+            if valid_token == auth_token:
                 return payload
             else:
                 raise jwt.InvalidTokenError
@@ -58,6 +64,7 @@ class Auth(object):
         except jwt.InvalidTokenError:
             raise jwt.ExpiredSignatureError
 
+    @staticmethod
     def authenticate(self, user, timedelta, SECRET_KEY):
         """
         用户登录，登录成功返回token和用户id，写将登录时间写入数据库；登录失败返回失败原因
@@ -66,34 +73,20 @@ class Auth(object):
         :return: json
         """
         login_time = int(time.time())
-
         token = self.encode_auth_token(user.id, login_time, timedelta, SECRET_KEY)
-        print(token)
-        token = token.decode()
+        user_token = redis_api.get_user_token(token)
+        if not user_token:
+            return jsonify({'code': '400', 'info': "用户已经退出登陆"})
 
+        token = token.decode()
         user.login_time = login_time
-        user.access_token = token
         db.session.commit()
         data = dict()
-        data['code'] = 'success'
+        data['code'] = '200'
         data['data'] = {"u_token": token, 'user_id': user.id, 'head_url': user.head_url, 'nickname': user.nickname}
         return jsonify(data)
 
-    def authenticate_merchant(self, merchant, timedelta, SECRET_KEY):
-        """
-        商户登录，登录成功返回token和商户id，写将登录时间写入数据库；登录失败返回失败原因
-        """
-        login_time = int(time.time())
-        token = self.encode_auth_token(merchant.id, login_time, timedelta, SECRET_KEY).decode()
-        merchant.login_time = login_time
-        merchant.access_token = token
-        db.session.commit()
-        data = dict()
-        data['code'] = 'success'
-        data['data'] = {"m_token": token, 'merchant_id': merchant.id, 'organization_name': merchant.organization_name,
-                        'name': merchant.name}
-        return jsonify(data)
-
+    @staticmethod
     def authenticate_admin_user(self, admin_user, timedelta, SECRET_KEY):
         """
         后台管理员登录
@@ -104,10 +97,8 @@ class Auth(object):
         """
         login_time = int(time.time())
         token = self.encode_auth_token(admin_user.id, login_time, timedelta, SECRET_KEY)
-        print(token)
         token = token.decode()
         admin_user.login_time = login_time
-        admin_user.access_token = token
         db.session.commit()
         data = dict()
         data['code'] = 'success'
@@ -115,6 +106,7 @@ class Auth(object):
                         'head_url': admin_user.head_url}
         return jsonify(data)
 
+    @staticmethod
     def identify(self, auth_header, SECRET_KEY):
         """
          后台用户鉴权
@@ -184,46 +176,8 @@ class Auth(object):
             data['info'] = "非法访问请求"
             return data
         data.update({
-            "code": "success",
+            "code": "200",
             "data": admin,
         })
         return data
 
-    @staticmethod
-    def merchant_identify(auth_header, SECRET_KEY):
-        """
-        后台用户鉴权
-        :param auth_header: Request header `Authorization`
-        :param SECRET_KEY:
-        :return: {"code": "success/error", "info": "", "data": ""/{}}
-        """
-        data = {"code": "error"}
-        if not auth_header:
-            data['info'] = "没有提供认证token"
-            return data
-        auth_tokens = auth_header.split(" ")
-        if (not auth_tokens) or (auth_tokens[0] != 'JWT') or (len(auth_tokens) != 2):
-            data['info'] = "请传递正确的验证头信息"
-            return data
-        auth_token = auth_tokens[1]
-        try:
-            payload = Auth.decode_auth_token(auth_token,SECRET_KEY)
-        except:
-            data['info'] = "Token失效"
-            return data
-        if isinstance(payload, str):
-            data.update({
-                "code": "success",
-                "data": payload,
-            })
-            return data
-        merchant_id = payload['data']['id']
-        merchant = Merchant.query.filter_by(id=merchant_id).first()
-        if (not merchant) or (merchant.status == "black") or (merchant.login_time != payload['data']['login_time']):
-            data['info'] = "非法访问请求"
-            return data
-        data.update({
-            "code": "success",
-            "data": merchant,
-        })
-        return data

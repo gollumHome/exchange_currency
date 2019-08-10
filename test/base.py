@@ -51,7 +51,8 @@ class BaseCase(TestCase):
             user = User(telephone=telephone, status="normal")
             db.session.add(user)
             db.session.commit()
-        Auth().authenticate(user, self.app.config['USER_TOKEN_USEFUL_DATE'], self.app.config['SECRET_KEY'])
+        Auth().authenticate(user, self.app.config['USER_TOKEN_USEFUL_DATE'],
+                            self.app.config['SECRET_KEY'])
         return user
 
     def prepare_merchant(self, telephone="18926157202", user_id=0, **kwargs):

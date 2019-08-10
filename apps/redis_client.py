@@ -17,6 +17,12 @@ class RedisClient:
     # def init_from_app(self, app):
     #     self.redis_client = redis.Redis(host=app.config['REDIS_SERVER_HOST'], port=6379, db=0)
 
+    def get_user_token(self, token):
+        return  self.redis_client.get(token)
+
+    def remove_user_token(self, token):
+        return self.redis_client.get(token)
+
     def get_scribe_obj(self):
         return self.redis_client.pubsub()
 

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from .constant import TAKER_ORDER_STATUS, \
+from apps.order.constant import TAKER_ORDER_STATUS, \
     ENTRUST_TYPE,\
     EXCHANGE_PROCESS_STATUS,MAKER_ORDER_STATUS
 from flask import jsonify, request
 import uuid
 import logging
 from apps.order import ov
+
 
 from apps.order.order_controller import OrderApi
 from apps.order.exchange_process_controller import ProcesApi
@@ -28,9 +29,26 @@ logger = logging.getLogger(__name__)
 
 @ov.route('/taker_order/', methods=['POST'])
 def create_taker_order():
+    """【更新taker order 状态】
+                url格式： /api/v1/order/taker_order/?pk=4
+               @@@
+               #### args
+
+               | args | nullable | type | remark |
+               |--------|--------|--------|--------|
+               |    hold_currency    |    false    |    string   |   本币    |
+               | exchange_currency  |    false    |    string   | 换汇货币  |
+               |   hold_amount     |    false    |    int   |    本币金额  |
+               |  exchange_amount |    false    |    string   |  换汇金额 |
+               |   book_no       |    false    |    string   |   订单id  |
+               |  status        |    false    |    string   |   吃单状态 |
+               #### return
+               - ##### json
+               >  {"code": "200"}
+               @@@
+               """
     param_data = request.json
-    #user_id = request.cookies.get('user_id')
-    user_id = 1
+    user_id = request.headers.get('user_id', 1)
     exchange_rate = OrderApi.get_current_exchange_rate()
     hold_currency = param_data.get('hold_currency', '')
     hold_amount = param_data.get('hold_amount', '')
@@ -74,12 +92,7 @@ def update_taker_order():
 
             | args | nullable | type | remark |
             |--------|--------|--------|--------|
-            |    hold_currency    |    false    |    string   |    手机号  |
-            | exchange_currency  |    false    |    string   |            |
-            |   hold_amount    |    false    |    string   |    手机号  |
-            |   exchange_amount    |    false    |    string   |    手机号  |
-            |   book_no    |    false    |    string   |    手机号  |
-            |  status    |    false    |    string   |    手机号  |
+            |  status        |    false    |    string   |   吃单状态 |
             #### return
             - ##### json
             >  {"code": "200"}

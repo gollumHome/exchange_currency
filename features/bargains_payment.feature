@@ -46,7 +46,7 @@ Feature: 砍价支付
     Given 用户'zhangsan'登录系统
 
     # remnant_inventory 无法验证此字段
-    Then 用户'zhangsan'查看最近创建的支付活动
+    　Then 用户'zhangsan'查看最近创建的支付活动
     """
     {
       "template_id": 1,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import enum
 from decimal import Decimal
-from .constant import TAKER_ORDER_STATUS,\
+from apps.order.constant import TAKER_ORDER_STATUS,\
     PROCESS_STATUS_EXPIRE_TIME, ENTRUST_TYPE,\
     EXCHANGE_PROCESS_STATUS
 from apps import db

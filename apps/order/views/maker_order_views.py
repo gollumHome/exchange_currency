@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import enum
 from decimal import Decimal
-from .constant import TAKER_ORDER_STATUS,MAKER_ORDER_STATUS\
+from apps.order.constant import TAKER_ORDER_STATUS,MAKER_ORDER_STATUS\
     ,EXCHANGE_PROCESS_STATUS,ENTRUST_TYPE
 
 from flask import jsonify, request
@@ -29,10 +29,24 @@ logger = logging.getLogger(__name__)
 
 @ov.route('/maker_order/', methods=['POST'])
 def create_order():
-    """
+    """【更新maer order 状态】
+                  url格式： /api/v1/order/taker_order/?pk=4
+                 @@@
+                 #### args
 
-    :return:
-    """
+                 | args | nullable | type | remark |
+                 |--------|--------|--------|--------|
+                 |    hold_currency    |    false    |    string   |   本币    |
+                 | exchange_currency  |    false    |    string   | 换汇货币  |
+                 |   hold_amount     |    false    |    int   |    本币金额  |
+                 |  exchange_amount |    false    |    string   |  换汇金额 |
+                 |   book_no       |    false    |    string   |   订单id  |
+                 |  status        |    false    |    string   |   挂单状态 |
+                 #### return
+                 - ##### json
+                 >  {"code": "200"}
+                 @@@
+                 """
     param_data = request.json
     user_id = 1
     exchange_rate = OrderApi.get_current_exchange_rate()
@@ -52,19 +66,6 @@ def create_order():
         result_order_pk = order_api.create_maker_order(user_id, book_no, hold_currency,
                                         hold_amount, exchange_currency,
                                         exchange_amount, exchange_rate, status)
-
-        # create taker porcess,set expire time
-        # exprocess_status = EXCHANGE_PROCESS_STATUS['matched']
-        # resultproces = process_api.create_exchange_process(book_no, user_id,
-        #                                                    exprocess_status,
-        #                                                    entrust_type)
-
-    # taker
-    # extend_remark = ''
-    # entrust_type = 1
-    # resultproces = ProcesApi.create_exchange_process(book_no, user_id, status,
-    #                                                  extend_remark, entrust_type)
-
     view_data = dict()
     if result_order_pk:
         view_data['code'] = '200'
@@ -102,6 +103,19 @@ def get_order_info():
 
 @ov.route('/maker_order/', methods=['PUT'])
 def update_maker_order():
+    """【更新maker order 状态】
+                url格式： /api/v1/order/taker_order/?pk=4
+               @@@
+               #### args
+
+               | args | nullable | type | remark |
+               |--------|--------|--------|--------|
+               |  status        |    false    |    string   |   挂单状态 |
+               #### return
+               - ##### json
+               >  {"code": "200"}
+               @@@
+               """
     pk = request.args.get('pk')
     status = request.args.get('status')
 

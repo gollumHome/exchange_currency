@@ -50,7 +50,7 @@ def response_wrapper(func):
         except:
             logger.error(traceback.format_exc())
             db.session.rollback()
-            return jsonify({"code": "error", "info": "unknown error", "data": {}})
+            return jsonify({"code": "500", "info": "unknown error", "data": {}})
     return _inner
 
 

@@ -11,7 +11,7 @@ from sqlalchemy import and_
 from threading import Thread
 
 from apps.auths import Auth
-from apps.models import User, Merchant, TelVerifyCode,  AdminUser, Member
+from apps.models import User, TelVerifyCode,  AdminUser
 from apps.utils import Utils
 from OtherService import OtherApi
 
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 other_api = OtherApi()
 
 
-def async(func):
+def asyncX(func):
     def wrapper(*args, **kwargs):
         thr = Thread(target=func, args=args, kwargs=kwargs)
         thr.start()
@@ -41,7 +41,6 @@ def access_token_required(func):
 
 def identify_required(func):
     func.__doc__ = (func.__doc__ or "").replace("@@@", "@@@\n### permission\nUser(用户权限)", 1)
-
     @wraps(func)
     def decorated_function(*args, **kwargs):
         auth_header = request.headers.get('Authorization')
@@ -81,22 +80,6 @@ def optional_identify_required(func):
     return decorated_function
 
 
-def merchant_identify_required(func):
-    func.__doc__ = (func.__doc__ or "").replace("@@@", "@@@\n### permission\nMerchant(商家权限)", 1)
-
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        print('merchant_identify_required')
-        auth_header = request.headers.get('Authorization')
-        working_app = current_app._get_current_object()
-        data = Auth.merchant_identify(auth_header, working_app.config['SECRET_KEY'])
-        if (not data) or data['code'] == "error":
-            return jsonify(data)
-        g.merchant: Merchant = data["data"]
-        return func(*args, **kwargs)
-    return decorated_function
-
-
 def admin_identify_required(func):
     func.__doc__ = (func.__doc__ or "").replace("@@@", "@@@\n### permission\nAdmin(管理员权限)", 1)
 
@@ -108,23 +91,6 @@ def admin_identify_required(func):
         if (not data) or data['code'] == "error":
             return jsonify(data)
         g.admin: AdminUser = data["data"]
-        return func(*args, **kwargs)
-    return decorated_function
-
-
-def merchant_expire_check_required(func):
-    func.__doc__ = (func.__doc__ or "").replace("@@@", "@@@\n### permission\nMerchant member(商家会员权限)", 1)
-
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        merchant = g.merchant
-        member = Member.query.filter(Member.merchant_id == merchant.id).order_by(Member.id.desc()).first()
-        if not member:
-            return jsonify({'code': 'error', 'info': 'merchant_expire', "data": "member"})
-        else:
-            now_time = int(time.time())
-            if member.expire_time < now_time:
-                return jsonify({'code': 'error', 'info': 'merchant_expire', "data": "member"})
         return func(*args, **kwargs)
     return decorated_function
 

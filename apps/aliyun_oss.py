@@ -15,7 +15,7 @@ class AliyunOss:
         self.public_bucket = app.config['OSS_PUBLIC_BUCKET']
         self.private_bucket = app.config['OSS_PRIVATE_BUCKET']
 
-    def _upload_to_public(self,img_name, file_bytes):
+    def _upload_to_public(self, img_name, file_bytes):
         # Endpoint
         bucket = oss2.Bucket(self.auth, 'oss-us-west-1.aliyuncs.com', self.public_bucket)
         bucket.put_object(img_name, file_bytes)

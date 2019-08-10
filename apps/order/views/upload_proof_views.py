@@ -5,14 +5,15 @@ import time
 import logging
 from apps.order import ov
 from flask import jsonify, request
-from flask import current_app
+
 from apps.order.sms_controller import SmsController
+
 
 
 from apps.models import *
 
 sms_api = SmsController()
-aliyun_oss = ''
+
 logger = logging.getLogger(__name__)
 
 

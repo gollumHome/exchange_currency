@@ -6,10 +6,11 @@
 ###############################################################
 
 from traceback import print_exc
-import time
+import random
+import string
 import logging
 from sqlalchemy import *
-from apps.utils import Utils
+from apps.utils import md5
 
 from apps.models import  User
 from apps.redis_client import RedisClient
@@ -25,7 +26,10 @@ class UserApi(object):
 
     def register(self, data):
         try:
-            self.db.session.add(User(username=data['username'],
+            salt = ''.join(random.sample(string.ascii_letters + string.digits, 32))
+            self.db.session.add(User(user_name=data['user_name'],
+                                     salt=salt,
+                                     password=md5(data['password'], salt),
                                      head_url=data['head_url'],
                                      telephone=data['telephone'],
                                      email=data['email'],
@@ -41,6 +45,15 @@ class UserApi(object):
             logger.error(print_exc())
             return False
 
+    def update_user_password(self, user, new_password):
+        try:
+            user.password = md5(new_password, user.salt)
+            self.db.session.commit()
+            return True
+        except Exception:
+            logger.error(print_exc())
+            return False
+
     def logout(self, user_id):
         user = User.query.filter(User.id == int(user_id)).first()
         if user:
@@ -49,3 +62,7 @@ class UserApi(object):
         else:
             return False
 
+    def loginIn(self, password,salt):
+        if password != md5(password, salt):
+            return False
+        return True

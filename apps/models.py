@@ -264,7 +264,9 @@ class User(db.Model):
     __tablename__ = 'User'
 
     id = Column(INTEGER(11), primary_key=True)
-    username = Column(VARCHAR(120), comment='用户名')
+    user_name = Column(VARCHAR(120), comment='用户名')
+    salt = Column(VARCHAR(120), comment='HASH随机盐')
+    password = Column(VARCHAR(120), comment='密码')
     head_url = Column(String(255), comment='头像')
     telephone = Column(String(12), comment='手机')
     email = Column(String(120), comment='登录邮箱')
@@ -277,6 +279,10 @@ class User(db.Model):
     verify_feedback = Column(JSON, comment='认证结果')
     invite_code = Column(String(32), comment='邀请码')
     additional_emails = Column(String(120), comment='补充邮箱')
+
+    @property
+    def password(self):
+        raise AttributeError("当前属性不可读")
 
 
 class UserReward(db.Model):

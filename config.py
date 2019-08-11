@@ -75,6 +75,11 @@ class Config:
     DEFAULT_DIAGRAM = 'https://xiaoyunbao-1253692831.cos.ap-shanghai.myqcloud.com/adaef4c55e07480687b48c805d5faf4f.png'
     MP_WXCODE_URL = 'https://xiaoyunbao-1253692831.cos.ap-shanghai.myqcloud.com/adaef4c55e07480687b48c805d5faf4f.png'
 
+    MAIL_SENDER = ''
+    MAIL_PASSWORD = ''
+    SMTP_SERVER = ''
+    SMTP_PORT = 25
+
     @staticmethod
     def init_app(app):
         pass

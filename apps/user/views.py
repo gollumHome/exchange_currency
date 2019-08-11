@@ -4,7 +4,7 @@ import re
 import time
 import logging
 import json
-
+from apps.utils import md5
 import urllib.parse
 import urllib.request
 from flask import jsonify, request
@@ -152,40 +152,17 @@ def user_login():
     > {"code": "success", "user_id": 202000,"u_token":"4d43082ecddb11e8aa4200163e0f3b60"}
     @@@
     """
-    try:
-            json_data = request.json or {}
-            jscode = json_data.get("code", None)
-            print(jscode)
-            wx_session_url = current_app.config['WX_SESSION_URL']
-            params = urllib.parse.urlencode({'appid':current_app.config['WX_APPID'],'secret':current_app.config['WX_APP_SECRET'],'js_code':jscode,'grant_type':'authorization_code'})
-            params = params.encode('utf-8')
-            with urllib.request.urlopen(wx_session_url, params, timeout=2) as f:
-                    openid_data = f.read().decode('utf-8')
-                    openid_data = json.loads(openid_data)
-                    print('openid_data %s' % openid_data)
-                    if 'openid' in openid_data:
-                            openid = openid_data['openid']
-                            session_key = openid_data['session_key']
-                            user = User.query.filter_by(openid=openid).first()
-                            if user:
-                                user.session_key = session_key
-                            else:
-                                now_time = int(time.time())
-                                try:
-                                    user = User(openid=openid, session_key=session_key, create_time=now_time,
-                                                status='normal')
-                                    db.session.add(user)
-                                    db.session.commit()
-                                except:
-                                    logger.error(print_exc())
-                            return Auth.authenticate(Auth, user, current_app.config['USER_TOKEN_USEFUL_DATE'],
-                                                     current_app.config['SECRET_KEY'])
-
-    except urllib.error.URLError as e:
-        logging.ERROR(e)
-    except:
-        logger.error(print_exc())
-    return jsonify({'code': '500'})
+    json_data = request.json or {}
+    email = json_data.get('email', '')
+    password = json_data.get('password', '')
+    user = User.query.filter(User.email == email).first()
+    if user:
+        login_status = user_api.loginIn(password, user.salt)
+        if login_status:
+            return Auth.authenticate(Auth, user, current_app.config['USER_TOKEN_USEFUL_DATE'],
+                                     current_app.config['SECRET_KEY'])
+        return jsonify({'code': '400', "infog": "账号名或密码错误"})
+    return jsonify({'code': '500', "infog": "系统内部错误"})
 
 
 @uv.route('/user/login_out', methods=['POST'])
@@ -217,34 +194,84 @@ def user_login_out():
 @response_wrapper
 @identify_required
 def user_info():
-    """保存用户信息
+    """修改用户信息
     @@@
     #### args
 
     | args | nullable | type | remark |
     |--------|--------|--------|--------|
-    |    nickname    |    false    |    string   |    用户昵称   |
-    |    avatar_url    |    false    |    string   |    用户头像    |
+    |    user_name    |    trure    |    string   |    用户昵称   |
+    |    head_url    |    trure    |    string   |    用户头像    |
+    |    password    |    trure    |    string   |    用户头像    |
 
     #### return
     - #####
     > {"code":"200"}
     @@@
     """
-    user_id = g.user_id
-    request_data = request.get_data(as_text=True)
-    json_data = json.loads(request_data)
-    nickname = json_data['nickname']
-    avatar_url = json_data['avatar_url']
+    user_id = 1
+    request_data = request.json
+    user_name = request_data.get('user_name', '')
+    head_url = request_data.get('head_url', '')
+    telephone = request_data.get('telephone','')
+    additional_emails = request_data.get('additional_emails', '')
+    if user_name == '' and head_url == '' \
+            or telephone == '' or additional_emails == '':
+        return jsonify({"code": "400", "infog": "请输入正确参数"})
 
     user = User.query.filter(User.id == int(user_id)).first()
-    if user:
-         user.nickname = nickname
-         user.head_url = avatar_url
-         db.session.commit()
-         return jsonify({"code": "200"})
-    else:
-         return jsonify({"code": "500"})
+    try:
+        if user:
+            if user_name:
+                user.user_name = user_name
+            if head_url:
+                user.head_url = head_url
+            if telephone:
+                user.telephone = telephone
+            if additional_emails:
+                user.additional_emails = additional_emails
+            db.session.commit()
+        return jsonify({"code": "200", "info": "更新信息成功"})
+    except Exception:
+        logger.error(print_exc())
+        return jsonify({"code": "500", "info": "更新信息失败"})
+
+
+@uv.route('/userinfo', methods=['POST'])
+@response_wrapper
+@identify_required
+def user_reset_password():
+    """修改用户信息
+    @@@
+    #### args
+
+    | args | nullable | type | remark |
+    |--------|--------|--------|--------|
+    |    email    |    false    |    string   |    用户账号  |
+    |    confirm    |    true    |    string   |    请求合法校验  |
+    |    password    |    true    |    string   |    用户新密码  |
+
+    #### return
+    - #####
+    > {"code":"200"}
+    @@@
+    """
+    request_data = request.json
+    email = request_data.get('email', '')
+    confirm = request_data.get('confirm', False)
+    password = request_data.get('password', False)
+    if email == "":
+        return jsonify({"code": "400", "infog": "请输入正确参数"})
+    user = User.query.filter(User.email == email).first()
+    if not user:
+        return jsonify({"code": "400", "infog": "该用户不存在"})
+    if confirm:
+        reset_status = user_api.update_user_password(user, password)
+        if reset_status:
+            return jsonify({"code": "200", "infog": "密码重置成功，重新登陆"})
+        if not reset_status:
+            return jsonify({"code": "500", "infog": "密码重置失败"})
+    return jsonify({"code": "403", "infog": "非法请求"})
 
 
 @uv.route('/register/', methods=['POST'])
@@ -272,13 +299,15 @@ def user_register():
       """
     data = request.json
 
-    username = data.get('username', '')
+    user_name = data.get('user_name', '')
+    password = data.get('password', '')
     telephone = data.get('telephone', '')
     email = data.get('email', '')
     verify_channel = data.get('verify_channel', '')
 
-    if username == '' or  telephone == ''\
-        or email == '' or verify_channel == '':
+    if user_name == '' or telephone == ''\
+        or email == '' or verify_channel == '' \
+            or password == '':
         return jsonify({"code": "400", "info": "缺少关键参数"})
 
     success = user_api.register(data)

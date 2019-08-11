@@ -22,6 +22,12 @@ from apps import db
 logger = logging.getLogger(__name__)
 
 
+def md5(pwd, salt):
+    obj = hashlib.md5(salt)
+    obj.update(pwd.encode('utf-8'))
+    return obj.hexdigest()
+
+
 def parse_offset_limit(request):
     offset = int(request.args.get("offset") or 0)
     limit = int(request.args.get("limit") or 20)

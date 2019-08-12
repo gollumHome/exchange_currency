@@ -29,23 +29,23 @@ logger = logging.getLogger(__name__)
 
 @ov.route('/maker_order/', methods=['POST'])
 def create_order():
-    """【更新maer order 状态】
-                  url格式： /api/v1/order/taker_order/?pk=4
-                 @@@
-                 #### args
+    """【更新maker order 状态】
+      url格式： /api/v1/order/taker_order/?pk=4
+     @@@
+     #### args
 
-                 | args | nullable | type | remark |
-                 |--------|--------|--------|--------|
-                 |    hold_currency    |    false    |    string   |   本币    |
-                 | exchange_currency  |    false    |    string   | 换汇货币  |
-                 |   hold_amount     |    false    |    int   |    本币金额  |
-                 |  exchange_amount |    false    |    string   |  换汇金额 |
-                 |   book_no       |    false    |    string   |   订单id  |
-                 |  status        |    false    |    string   |   挂单状态 |
-                 #### return
-                 - ##### json
-                 >  {"code": "200"}
-                 @@@
+     | args | nullable | type | remark |
+     |--------|--------|--------|--------|
+     |    hold_currency    |    false    |    string   |   本币    |
+     | exchange_currency  |    false    |    string   | 换汇货币  |
+     |   hold_amount     |    false    |    int   |    本币金额  |
+     |  exchange_amount |    false    |    string   |  换汇金额 |
+     |   book_no       |    false    |    string   |   订单id  |
+     |  status        |    false    |    string   |   挂单状态 |
+     #### return
+     - ##### json
+     >  {"code": "200"}
+     @@@
                  """
     param_data = request.json
     user_id = 1
@@ -78,7 +78,19 @@ def create_order():
 
 @ov.route('/maker_order/', methods=['GET'])
 def get_order_info():
-    pk = request.args.get('pk')
+    """【获取maker order 当前状态，默认只有一条交易中的状态】
+       url格式： /api/v1/order/taker_order/
+      @@@
+      #### args
+
+      | args | nullable | type | remark |
+      |--------|--------|--------|--------|
+      |  status        |    false    |    string   |   挂单状态 |
+      #### return
+      - ##### json
+      >  {"code": "200"}
+      @@@
+      """
     obj = order_api.get_maker_order_by_pk(pk)
 
     if obj:

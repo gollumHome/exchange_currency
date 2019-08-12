@@ -159,7 +159,6 @@ def add_reward():
 
 
 @pv.route('/unipay', methods=['POST'])
-@identify_required
 def unipay():
     """小程序调起支付所需的签名数据
         @@@

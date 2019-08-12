@@ -41,10 +41,10 @@ class OrderApi(object):
     def get_current_exchange_rate():
         return 0.08
 
-    def get_maker_order_by_pk(self, pk):
+    def get_maker_order_list(self, user_id):
         try:
-            order_obj = self.db.session.query(MakerOrder).\
-                filter(MakerOrder.id == pk).first()
+            order_obj_list = self.db.session.query(MakerOrder).\
+                filter(MakerOrder.user_id == user_id).f
             return order_obj
         except:
             LOG.error(print_exc())

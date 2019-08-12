@@ -5,9 +5,7 @@ import time
 import logging
 import json
 from apps.utils import md5
-import urllib.parse
-import urllib.request
-from flask import jsonify, request
+
 
 from apps.utils import response_wrapper
 from apps import db, tc_oss, tc_sms
@@ -16,10 +14,10 @@ from apps.aliyun_oss import AliyunOss
 from apps.user.user_controller import UserApi
 
 
-from apps.common import *
 
-aliyun_oss = AliyunOss()
-user_api = UserApi()
+
+#aliyun_oss = AliyunOss()
+user_api = UserApi(db)
 
 logger = logging.getLogger()
 
@@ -191,8 +189,6 @@ def user_login_out():
 
 
 @uv.route('/userinfo', methods=['POST'])
-@response_wrapper
-@identify_required
 def user_info():
     """修改用户信息
     @@@
@@ -238,8 +234,6 @@ def user_info():
 
 
 @uv.route('/userinfo', methods=['POST'])
-@response_wrapper
-@identify_required
 def user_reset_password():
     """修改用户信息
     @@@
@@ -276,6 +270,7 @@ def user_reset_password():
 
 @uv.route('/register/', methods=['POST'])
 def user_register():
+
     """【注册用户】
        url格式： /api/v1/user/register/?
       @@@

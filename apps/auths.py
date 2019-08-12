@@ -30,11 +30,11 @@ class Auth(object):
                 'iat': datetime.datetime.utcnow(),
                 'iss': 'ken',
                 'data': {
-                    'id': user_id,
+                    'user_id': user_id,
                     'login_time': login_time
                 }
             }
-            token = jwt.encode( payload, SECRET_KEY, algorithm='HS256')
+            token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
             redis_api.set_scribe_expired(token, expired_time)
         except Exception as e:
             return e

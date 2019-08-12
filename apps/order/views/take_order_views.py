@@ -5,6 +5,7 @@ from apps.order.constant import TAKER_ORDER_STATUS, \
     EXCHANGE_PROCESS_STATUS,MAKER_ORDER_STATUS
 from flask import jsonify, request
 import uuid
+import json
 import logging
 from apps.order import ov
 
@@ -46,19 +47,20 @@ def create_taker_order():
        >  {"code": "200"}
        @@@
        """
-    param_data = request.json
-    user_id = request.headers.get('user_id', 1)
+    user_id = 1
+    param_data = json.loads(request.data)
     exchange_rate = OrderApi.get_current_exchange_rate()
     hold_currency = param_data.get('hold_currency', '')
     hold_amount = param_data.get('hold_amount', '')
+    book_no = param_data.get('book_no', '')
     exchange_currency = param_data.get('exchange_currency', '')
     if hold_currency == '' or hold_amount == '' \
-            or exchange_currency == '':
+            or exchange_currency == '' or book_no == '':
         return jsonify({"code": "400", "info": "缺少关键参数"})
     exchange_amount = OrderApi.currency_exchange(hold_currency,
                                                  hold_amount,
                                                  exchange_currency)
-    book_no = str(uuid.uuid1())
+
     order_status = TAKER_ORDER_STATUS['matched']
     entrust_type = ENTRUST_TYPE['taker']
 
@@ -87,18 +89,21 @@ def update_taker_order():
     """【更新taker order 状态】
              url格式： /api/v1/order/taker_order/?pk=4
             @@@
-            #### args
+            #### data
 
             | args | nullable | type | remark |
             |--------|--------|--------|--------|
-            |  status        |    false    |    string   |   吃单状态 |
+            |  status        |    false    |    string   |   吃单状态 | <matched,set_wallet,
+               sended,received,disputed,complete,canceled>|
+            |     extend_remark     |    true    |    json   |   钱包 |  |
             #### return
             - ##### json
             >  {"code": "200"}
             @@@
             """
     pk = request.args.get('pk')
-    status = request.args.get('status')
+    param_data = json.loads(request.data)
+    status = param_data.get('status', '')
 
     if not status and not pk:
         return jsonify({"code": "400", "info": "缺少关键参数"})
@@ -114,10 +119,10 @@ def update_taker_order():
 
     if status == TAKER_ORDER_STATUS['matched']:
         transaction = update_taker_order_transtions('matched', pk, obj.book_no,
-                                      MAKER_ORDER_STATUS['matched'],
-                                      TAKER_ORDER_STATUS['matched'],
-                                      EXCHANGE_PROCESS_STATUS['matched'],
-                                      ENTRUST_TYPE['taker'])
+                                                    MAKER_ORDER_STATUS['matched'],
+                                                    TAKER_ORDER_STATUS['matched'],
+                                                    EXCHANGE_PROCESS_STATUS['matched'],
+                                                    ENTRUST_TYPE['taker'])
         if not transaction:
             return jsonify({'code': '500', 'info': "吃单内部错误"})
         scribe_result = scribe_api.subscribe_process_exchange(process.id,
@@ -132,14 +137,14 @@ def update_taker_order():
             return jsonify({'code': '500', 'info': "通知创单匹配信息失败"})
 
     if status == TAKER_ORDER_STATUS['set_wallet']:
-        extend_remark = request.args.get('extend_remark', "")
+        extend_remark = param_data              .get('extend_remark', "")
         if not extend_remark:
             return jsonify({"code": "400", "info": "缺少关键参数"})
         transaction = update_taker_order_transtions('set_wallet',pk, obj.book_no,
-                                      MAKER_ORDER_STATUS['set_wallet'],
-                                      TAKER_ORDER_STATUS['set_wallet'],
-                                      EXCHANGE_PROCESS_STATUS['set_wallet'],
-                                      ENTRUST_TYPE['taker'])
+                                                    MAKER_ORDER_STATUS['set_wallet'],
+                                                    TAKER_ORDER_STATUS['set_wallet'],
+                                                    EXCHANGE_PROCESS_STATUS['set_wallet'],
+                                                    ENTRUST_TYPE['taker'])
         if not transaction:
             return jsonify({'code': '500', 'info': "吃单添加钱包内部错误"})
 
@@ -159,10 +164,10 @@ def update_taker_order():
 
     if status == TAKER_ORDER_STATUS['sended']:
         transaction = update_taker_order_transtions('sended',pk, obj.book_no,
-                                      MAKER_ORDER_STATUS['sended'],
-                                      TAKER_ORDER_STATUS['sended'],
-                                      EXCHANGE_PROCESS_STATUS['sended'],
-                                      ENTRUST_TYPE['taker'])
+                                                    MAKER_ORDER_STATUS['sended'],
+                                                    TAKER_ORDER_STATUS['sended'],
+                                                    EXCHANGE_PROCESS_STATUS['sended'],
+                                                    ENTRUST_TYPE['taker'])
 
         if not transaction:
             return jsonify({'code': '500', 'info': "吃单设置sended状态内部错误"})
@@ -174,18 +179,18 @@ def update_taker_order():
 
     if status == TAKER_ORDER_STATUS['received']:
         transaction = update_taker_order_transtions('received',pk, obj.book_no,
-                                      MAKER_ORDER_STATUS['received'],
-                                      TAKER_ORDER_STATUS['received'],
-                                      EXCHANGE_PROCESS_STATUS['received'],
-                                      ENTRUST_TYPE['taker'])
+                                                     MAKER_ORDER_STATUS['received'],
+                                                     TAKER_ORDER_STATUS['received'],
+                                                     EXCHANGE_PROCESS_STATUS['received'],
+                                                     ENTRUST_TYPE['taker'])
         if not transaction:
             return jsonify({'code': '500', 'info': "吃单设置received状态内部错误"})
     if status == TAKER_ORDER_STATUS['disputed']:
         transaction = update_taker_order_transtions('disputed',pk, obj.book_no,
-                                      MAKER_ORDER_STATUS['received'],
-                                      TAKER_ORDER_STATUS['received'],
-                                      EXCHANGE_PROCESS_STATUS['received'],
-                                      ENTRUST_TYPE['taker'])
+                                                     MAKER_ORDER_STATUS['received'],
+                                                     TAKER_ORDER_STATUS['received'],
+                                                     EXCHANGE_PROCESS_STATUS['received'],
+                                                     ENTRUST_TYPE['taker'])
         if not transaction:
             return jsonify({'code': '500', 'info': "吃单设置disputed状态内部错误"})
         scribe_result = scribe_api.subscribe_process_exchange(process.id,
@@ -193,20 +198,22 @@ def update_taker_order():
                                                               EXCHANGE_PROCESS_STATUS['set_wallet'])
         if not scribe_result:
             return jsonify({'code': '500', 'info': "订阅吃单申诉状态超时时间失败"})
+
     if status == TAKER_ORDER_STATUS['complete']:
         transaction = update_taker_order_transtions('complete',pk, obj.book_no,
-                                      MAKER_ORDER_STATUS['complete'],
-                                      TAKER_ORDER_STATUS['complete'],
-                                      EXCHANGE_PROCESS_STATUS['complete'],
-                                      ENTRUST_TYPE['taker'])
+                                                    MAKER_ORDER_STATUS['complete'],
+                                                    TAKER_ORDER_STATUS['complete'],
+                                                    EXCHANGE_PROCESS_STATUS['complete'],
+                                                    ENTRUST_TYPE['taker'])
         if not transaction:
             return jsonify({'code': '500', 'info': "吃单设置complete状态内部错误"})
+
     if status == TAKER_ORDER_STATUS['canceled']:
         transaction = update_taker_order_transtions('canceled',pk, obj.book_no,
-                                      MAKER_ORDER_STATUS['canceled'],
-                                      TAKER_ORDER_STATUS['canceled'],
-                                      EXCHANGE_PROCESS_STATUS['canceled'],
-                                      ENTRUST_TYPE['taker'])
+                                                    MAKER_ORDER_STATUS['canceled'],
+                                                    TAKER_ORDER_STATUS['canceled'],
+                                                    EXCHANGE_PROCESS_STATUS['canceled'],
+                                                    ENTRUST_TYPE['taker'])
         if not transaction:
             return jsonify({'code': '500', 'info': "吃单设置canceled状态内部错误"})
     view_data = dict()
@@ -235,7 +242,7 @@ def update_taker_order_transtions(type, pk, book_no, maker_status,
         return False
 
 
-@ov.route('/maker_order/', methods=['GET'])
+@ov.route('/taker_order/', methods=['GET'])
 def get_taker_order_list():
     """【获取maker order 当前状态，默认只有一条交易中的状态】
        url格式： /api/v1/order/taker_order/
@@ -249,5 +256,29 @@ def get_taker_order_list():
       >  {"code": "200"}
       @@@
       """
+    user_id = 1
+    page = request.args.get('page', 1)
+    size = request.args.get('size', 10)
+    obj_list = order_api.get_taker_order_list(user_id, page, size)
+    if obj_list:
+        resp_data = list()
+        for obj in obj_list:
+            resp_data.append({
+                "book_no": obj.book_no,
+                "user_id": user_id,
+                "hold_currency": obj.hold_currency,
+                "exchange_currency": obj.exchange_currency,
+                "hold_amount": obj.hold_currency,
+                "exchange_amount": obj.exchange_amount,
+                "exchange_rate": obj.exchange_rate,
+                "create_time": obj.create_time,
+                "stauts": obj.status})
+    else:
+        resp_data = []
+    view_data = dict()
+    view_data['code'] = '200'
+    view_data['data'] = resp_data
+    return jsonify(view_data)
+
 
 

@@ -49,3 +49,8 @@ ENTRUST_TYPE = {
     "maker": "maker",
     "taker": "taker"
 }
+
+ECCHANGE_CURRENCY_TYPE = {
+    'CNY': '1',
+    'USD': '2'
+}

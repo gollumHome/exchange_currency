@@ -5,7 +5,8 @@ from traceback import print_exc
 from apps.models import *
 import time
 from decimal import Decimal
-from .constant import TAKER_ORDER_STATUS,EXCHANGE_PROCESS_STATUS
+from .constant import TAKER_ORDER_STATUS,PROCESS_STATUS_EXPIRE_TIME,\
+    EXCHANGE_PROCESS_STATUS
 
 from apps.tencent_sms import TencentSms
 
@@ -26,16 +27,20 @@ class ProcesApi(object):
         try:
             expire_time = 0
             now_time = int(time.time())
-            if status == '':
-                expire_time = now_time = 30
-            if status == '':
-                expire_time = now_time = 30
+            if status == PROCESS_STATUS_EXPIRE_TIME['matched']:
+                expire_time = now_time = 5
+            if status == PROCESS_STATUS_EXPIRE_TIME['pending']:
+                expire_time = now_time = 5
+            if status == PROCESS_STATUS_EXPIRE_TIME['set_wallet']:
+                expire_time = now_time = 5
+            if status == PROCESS_STATUS_EXPIRE_TIME['sended']:
+                expire_time = now_time = 5
             taker_order_obj = ExchangeProgres(book_no=book_no,
                                               user_id=user_id,
                                               status=status,
                                               create_time=now_time,
                                               expire_time=expire_time,
-                                              entrust_type=1)
+                                              entrust_type=entrust_type)
             self.db.session.add(taker_order_obj)
             self.db.session.flush()
             return True
@@ -117,7 +122,6 @@ class ProcesApi(object):
         try:
             obj = ExchangeProgres.query.filter_by(id=pk).first()
             if obj:
-                obj.status = EXCHANGE_PROCESS_STATUS['set_wallet']
                 obj.extend_remark = data
             self.db.session.flush()
             self.db.session.commit()

@@ -170,7 +170,8 @@ class MakerOrder(db.Model):
     exchange_amount = Column(INTEGER(11), nullable=False, comment='换汇金额')
     exchange_rate = Column(DECIMAL(10, 3), nullable=False, comment='汇率')
     create_time = Column(INTEGER(11), nullable=False, comment='创建时间')
-    status = Column(ENUM('canceled', 'matched', 'pending', 'sended', 'received', 'set_wallet', 'payed', 'disputed', 'complete'), nullable=False, comment='挂单状态')
+    status = Column(ENUM('canceled', 'matched', 'pending', 'sended', 'received', 'set_wallet', 'payed', 'disputed',
+                         'createded', 'complete'), nullable=False, comment='挂单状态')
 
 
 class Message(db.Model):

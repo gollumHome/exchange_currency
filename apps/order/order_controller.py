@@ -14,7 +14,7 @@ from apps.utils import Utils
 from .constant import TAKER_ORDER_STATUS
 
 from apps.models import MakerOrder,TakerOrder
-
+from apps.order.constant import  ECCHANGE_CURRENCY_TYPE
 from apps.order.exchange_process_controller import ProcesApi
 from apps.models import  User
 
@@ -32,7 +32,8 @@ class OrderApi(object):
     def currency_exchange(hold_currency, hold_amount,
                           exchange_currency
                           ):
-        if hold_currency == '' and exchange_currency == '':
+        if hold_currency == ECCHANGE_CURRENCY_TYPE['CNY'] \
+                and exchange_currency ==  ECCHANGE_CURRENCY_TYPE['USD']:
             exchange_amount = hold_amount * 0.08
             return exchange_amount
         return 0
@@ -41,13 +42,29 @@ class OrderApi(object):
     def get_current_exchange_rate():
         return 0.08
 
-    def get_maker_order_list(self, user_id):
+    def get_maker_order_list(self, user_id, page, size):
         try:
             order_obj_list = self.db.session.query(MakerOrder).\
-                filter(MakerOrder.user_id == user_id).all()
+                filter(MakerOrder.user_id == user_id,
+                       ~MakerOrder.status.in_(['complete','canceled'])).\
+                limit(size).offset((page-1)*size)
+            if order_obj_list:
+                return order_obj_list
         except Exception:
-            pass
+            LOG.error(print_exc())
+            return None
 
+    def get_taker_order_list(self, user_id, page, size):
+        try:
+            order_obj_list = self.db.session.query(MakerOrder). \
+                filter(TakerOrder.user_id == user_id,
+                       ~TakerOrder.status.in_(['complete', 'canceled'])). \
+                limit(size).offset((page - 1) * size)
+            if order_obj_list:
+                return order_obj_list
+        except Exception:
+            LOG.error(print_exc())
+            return None
 
     def create_maker_order(self, user_id, book_no, hold_currency,
                            hold_amount, exchange_currency,

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import enum
 from decimal import Decimal
+import json
 from apps.order.constant import TAKER_ORDER_STATUS,MAKER_ORDER_STATUS\
     ,EXCHANGE_PROCESS_STATUS,ENTRUST_TYPE
 
@@ -39,7 +40,7 @@ def create_order():
      |    hold_currency    |    false    |    string   |   本币    |
      | exchange_currency  |    false    |    string   | 换汇货币  |
      |   hold_amount     |    false    |    int   |    本币金额  |
-     |  exchange_amount |    false    |    string   |  换汇金额 |
+     |  exchange_amount |    false    |    int   |  换汇金额 |
      |   book_no       |    false    |    string   |   订单id  |
      |  status        |    false    |    string   |   挂单状态 |
      #### return
@@ -47,8 +48,8 @@ def create_order():
      >  {"code": "200"}
      @@@
      """
-    param_data = request.json
     user_id = 1
+    param_data = json.loads(request.data)
     exchange_rate = OrderApi.get_current_exchange_rate()
     hold_currency = param_data.get('hold_currency', '')
     hold_amount = param_data.get('hold_amount', '')
@@ -78,34 +79,38 @@ def create_order():
 
 @ov.route('/maker_order/', methods=['GET'])
 def get_maker_order_list():
-    """【获取maker order 当前状态，默认只有一条交易中的状态】
+    """【获取maker order 当前状态，
+        默认只有一条交易中的状态,通过header 传递user_id】
        url格式： /api/v1/order/maker_order/
       @@@
       #### args
 
       | args | nullable | type | remark |
       |--------|--------|--------|--------|
-      |  status        |    false    |    string   |   挂单状态 |
+       |  page        |    true    |    string   |    |
+        |  size        |    true    |    string   |    |
       #### return
       - ##### json
       >  {"code": "200"}
       @@@
       """
-
-    obj = order_api.get_maker_order_by_pk(pk)
-
-    if obj:
-        resp_data = {"id": obj.id,
-                     "book_no": obj.book_no,
-                     "user_id": obj.user_id,
-                     "hold_currency": obj.hold_currency,
-                     "exchange_currency": obj.exchange_currency,
-                     "hold_amount": obj.hold_amount,
-                     "exchange_amount": obj.exchange_amount,
-                     "exchange_rate": obj.exchange_rate,
-                     "create_time": obj.create_time,
-                     "status": obj.status
-                     }
+    user_id = 1
+    page = request.args.get('page', 1)
+    size = request.args.get('size', 10)
+    obj_list = order_api.get_maker_order_list(user_id, page, size)
+    resp_data = list()
+    if obj_list:
+        for obj in obj_list:
+            resp_data.append({
+                             "book_no": obj.book_no,
+                             "user_id": user_id,
+                             "hold_currency": obj.hold_currency,
+                             "exchange_currency": obj.exchange_currency,
+                             "hold_amount": obj.hold_currency,
+                             "exchange_amount": obj.exchange_amount,
+                             "exchange_rate": obj.exchange_rate,
+                             "create_time": obj.create_time,
+                             "stauts": obj.status})
     else:
         resp_data = {}
     view_data = dict()
@@ -117,21 +122,23 @@ def get_maker_order_list():
 @ov.route('/maker_order/', methods=['PUT'])
 def update_maker_order():
     """【更新maker order 状态】
-                url格式： /api/v1/order/taker_order/?pk=4
-               @@@
-               #### args
+        url格式： /api/v1/order/taker_order/?pk=4
+       @@@
+       #### args
 
-               | args | nullable | type | remark |
-               |--------|--------|--------|--------|
-               |  status        |    false    |    string   |   挂单状态 |
-               #### return
-               - ##### json
-               >  {"code": "200"}
-               @@@
-               """
+       | args | nullable | type | remark |
+       |--------|--------|--------|--------|
+       |  status        |    false    |    string   |   挂单状态 | <pending,createded,matched,set_wallet,
+       sended,received,disputed,complete,canceled>|
+     |     extend_remark     |    true    |    json   |   钱包 |  |
+       #### return
+       - ##### json
+       >  {"code": "200"}
+       @@@
+       """
     pk = request.args.get('pk')
-    status = request.args.get('status')
-
+    param_data = json.loads(request.data)
+    status = param_data.get('status', '')
     if not pk and not status:
         return jsonify({'code': '400', 'info': "参数错误"})
 
@@ -140,10 +147,10 @@ def update_maker_order():
         return jsonify({'code': '500', 'info': "读取创单Obj 错误"})
 
     if status == TAKER_ORDER_STATUS['set_wallet']:
-        extend_remark = request.args.get('extend_remark', "")
+        extend_remark = param_data.get('extend_remark', "")
         if not extend_remark:
             return jsonify({"code": "400", "info": "缺少关键参数"})
-        transaction = update_maker_order_transtions( pk, obj.book_no,
+        transaction = update_maker_order_transtions('set_wallet', pk, obj.book_no,
                                                     MAKER_ORDER_STATUS['set_wallet'],
                                                     EXCHANGE_PROCESS_STATUS['set_wallet'],
                                                     ENTRUST_TYPE['maker'])
@@ -163,7 +170,7 @@ def update_maker_order():
             return jsonify({'code': '500', 'info': "设置挂单超时过程失败"})
 
     if status == TAKER_ORDER_STATUS['sended']:
-        transaction = update_maker_order_transtions(pk, obj.book_no,
+        transaction = update_maker_order_transtions('sended', pk, obj.book_no,
                                                     MAKER_ORDER_STATUS['sended'],
                                                     EXCHANGE_PROCESS_STATUS['sended'],
                                                     ENTRUST_TYPE['maker'])
@@ -178,8 +185,9 @@ def update_maker_order():
                                                               EXCHANGE_PROCESS_STATUS['sended'])
         if not scribe_result:
             return jsonify({'code': '500', 'info': "设置挂单超时过程失败"})
+
     if status == TAKER_ORDER_STATUS['received']:
-        transaction = update_maker_order_transtions(pk, obj.book_no,
+        transaction = update_maker_order_transtions('received',pk, obj.book_no,
                                                     MAKER_ORDER_STATUS['received'],
                                                     EXCHANGE_PROCESS_STATUS['received'],
                                                     ENTRUST_TYPE['maker'])
@@ -189,8 +197,9 @@ def update_maker_order():
                                                            ENTRUST_TYPE['maker'])
         if not process_obj:
             jsonify({'code': '500', 'info': "获取交易对象失败"})
+
     if status == TAKER_ORDER_STATUS['disputed']:
-        transaction = update_maker_order_transtions(pk, obj.book_no,
+        transaction = update_maker_order_transtions('disputed', pk, obj.book_no,
                                                     MAKER_ORDER_STATUS['disputed'],
                                                     EXCHANGE_PROCESS_STATUS['disputed'],
                                                     ENTRUST_TYPE['maker'])
@@ -211,7 +220,7 @@ def update_maker_order():
             return jsonify({'code': '500', 'info': "通知创单申诉信息失败"})
 
     if status == TAKER_ORDER_STATUS['complete']:
-        transaction = update_maker_order_transtions(pk, obj.book_no,
+        transaction = update_maker_order_transtions('complete', pk, obj.book_no,
                                                     MAKER_ORDER_STATUS['complete'],
                                                     EXCHANGE_PROCESS_STATUS['complete'],
                                                     ENTRUST_TYPE['maker'])
@@ -226,8 +235,9 @@ def update_maker_order():
                                                               EXCHANGE_PROCESS_STATUS['complete'])
         if not scribe_result:
             return jsonify({'code': '500', 'info': "设置挂单超时过程失败"})
+
     if status == TAKER_ORDER_STATUS['canceled']:
-        transaction = update_maker_order_transtions(pk, obj.book_no,
+        transaction = update_maker_order_transtions('canceled', pk, obj.book_no,
                                                     MAKER_ORDER_STATUS['canceled'],
                                                     EXCHANGE_PROCESS_STATUS['canceled'],
                                                     ENTRUST_TYPE['maker'])
@@ -248,10 +258,11 @@ def update_maker_order():
     return jsonify(view_data)
 
 
-def update_maker_order_transtions(type,pk, book_no,
+def update_maker_order_transtions(type, pk, book_no,
                                   maker_status,
                                   process_status,
                                   process_entrust_type):
+
 
     try:
         with AtoSubmit(db):

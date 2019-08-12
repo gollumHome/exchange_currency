@@ -27,6 +27,19 @@ logger = logging.getLogger(__name__)
 
 @ov.route('/taker_order/fee', methods=['GET'])
 def taker_order_exchange():
+    """【吃单 交易收费】
+      url格式： /api/v1/order/taker_order/?pk=4
+     @@@
+     #### args
+
+     | args | nullable | type | remark |
+     |--------|--------|--------|--------|
+     |    pk    |    false    |    string   |   吃单主键    |
+     #### return
+     - ##### json
+     >  {"code": "200"}
+     @@@
+     """
     pk = request.args.get('pk')
     obj = TakerOrder.query.filter(id=pk).first()
     view_data = dict()
@@ -42,6 +55,19 @@ def taker_order_exchange():
 
 @ov.route('/maker_order/fee', methods=['GET'])
 def maker_order_exchange():
+    """【挂单 交易收费】
+        url格式： /api/v1/order/taker_order/?pk=4
+       @@@
+       #### args
+
+       | args | nullable | type | remark |
+       |--------|--------|--------|--------|
+       |    pk    |    false    |    string   |   挂单主键    |
+       #### return
+       - ##### json
+       >  {"code": "200"}
+       @@@
+       """
     pk = request.args.get('pk')
     obj = MakerOrder.query.filter(id=pk).first()
     view_data = dict()

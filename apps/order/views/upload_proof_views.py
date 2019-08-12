@@ -8,8 +8,6 @@ from flask import jsonify, request
 
 from apps.order.sms_controller import SmsController
 
-
-
 from apps.models import *
 
 sms_api = SmsController()
@@ -26,6 +24,20 @@ def allowed_file(filename):
 
 @ov.route('/taker_order/upload_proof/', methods=['POST'])
 def upload_taker_order_proof():
+    """【上传吃单 交易凭证】
+            url格式： /api/v1/order/taker_order/?pk=4
+           @@@
+           #### args
+
+           | args | nullable | type | remark |
+           |--------|--------|--------|--------|
+           |  pk        |    false    |    string   |   吃单主键|
+           |  file        |    false    |    byte   |   交易文件|
+           #### return
+           - ##### json
+           >  {"code": "200"}
+           @@@
+           """
     pk = request.args.get('pk')
     obj = TakerOrder.query.filter(id=pk)
     if not obj:
@@ -45,6 +57,20 @@ def upload_taker_order_proof():
 
 @ov.route('/maker_order/upload_proof/', methods=['POST'])
 def upload_maker_order_proof():
+    """【上传挂单 交易凭证】
+        url格式： /api/v1/order/taker_order/?pk=4
+       @@@
+       #### args
+
+       | args | nullable | type | remark |
+       |--------|--------|--------|--------|
+       |  pk        |    false    |    string   |   挂单主键|
+       |  file        |    false    |    byte   |   交易文件|
+       #### return
+       - ##### json
+       >  {"code": "200"}
+       @@@
+       """
     pk = request.args.get('pk')
     obj = MakerOrder.query.filter(id=pk)
     if not obj:

@@ -52,7 +52,7 @@ class SchedulerApi(object):
                 # todo redis event timeout set status
                 pass
             if taker_order.status == '2':
-                # todo redis event timeout set status
+                pass
 
 #
 #     def recove_timeout_order(self):

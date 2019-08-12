@@ -18,6 +18,7 @@ def create_app(config_name):
     from apps.order import ov
     # from apps.pay import pv
     from apps.user import uv
+
     # from apps.backend import bv
     app = flask.Flask(__name__)
     app.config.from_object(config[config_name])
@@ -25,7 +26,6 @@ def create_app(config_name):
     db.init_app(app)
 
     app.register_blueprint(uv)
-
     app.register_blueprint(ov)
     # app.register_blueprint(pv)
     # app.register_blueprint(bv)

@@ -46,7 +46,7 @@ def create_order():
      - ##### json
      >  {"code": "200"}
      @@@
-                 """
+     """
     param_data = request.json
     user_id = 1
     exchange_rate = OrderApi.get_current_exchange_rate()
@@ -77,9 +77,9 @@ def create_order():
 
 
 @ov.route('/maker_order/', methods=['GET'])
-def get_order_info():
+def get_maker_order_list():
     """【获取maker order 当前状态，默认只有一条交易中的状态】
-       url格式： /api/v1/order/taker_order/
+       url格式： /api/v1/order/maker_order/
       @@@
       #### args
 
@@ -91,6 +91,7 @@ def get_order_info():
       >  {"code": "200"}
       @@@
       """
+
     obj = order_api.get_maker_order_by_pk(pk)
 
     if obj:

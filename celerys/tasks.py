@@ -43,7 +43,8 @@ def cycle_get_token_job():
 @celery.task
 def settle_job():
     with app.app_context():
-        scheduler_api.trade_settle()
+        pass
+
 
 
 @celery.task
@@ -52,10 +53,12 @@ def recove_order_job():
         scheduler_api.recove_timeout_order()
 
 
+
 @celery.task
 def query_wx_order_job():
     with app.app_context():
         scheduler_api.wx_order_query(app)
+
 
 
 @celery.task
@@ -70,10 +73,12 @@ def complete_enrolls_job():
         scheduler_api.complete_enrolls()
 
 
+
 @celery.task
 def recove_reward_job():
     with app.app_context():
         scheduler_api.recove_reward_order()
+
 
 
 @celery.task
@@ -82,10 +87,12 @@ def complete_groups():
         scheduler_api.complete_groups()
 
 
+
 @celery.task
 def close_timeout_activity():
     with app.app_context():
         scheduler_api.close_timeout_activity()
+
 
 
 @celery.task
@@ -94,24 +101,9 @@ def remove_timeout_member():
         scheduler_api.remove_timeout_member(app)
 
 
+
 @celery.task
 def enroll_statics():
     with app.app_context():
         scheduler_api.enroll_statics()
 
-
-@celery.task
-def assist_rank_job():
-    with app.app_context():
-        scheduler_api.assist_rank_job()
-
-
-@celery.task
-def query_wx_refund_job():
-    print('query_wx_refund start')
-
-
-@celery.task
-def query_transfers_job():
-    with app.app_context():
-        scheduler_api.wx_transfers_query(app)

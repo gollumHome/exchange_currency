@@ -235,6 +235,19 @@ def update_taker_order_transtions(type, pk, book_no, maker_status,
         return False
 
 
+@ov.route('/maker_order/', methods=['GET'])
+def get_taker_order_list():
+    """【获取maker order 当前状态，默认只有一条交易中的状态】
+       url格式： /api/v1/order/taker_order/
+      @@@
+      #### args
 
+      | args | nullable | type | remark |
+      |--------|--------|--------|--------|
+      #### return
+      - ##### json
+      >  {"code": "200"}
+      @@@
+      """
 
 

@@ -3,7 +3,7 @@
 import time
 import datetime
 
-import jwt
+#import jwt
 from flask import jsonify
 
 from apps import db

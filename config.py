@@ -87,7 +87,8 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@139.196.78.95:3306/JK-exchange?charset=utf8mb4'
+    #SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@139.196.78.95:3306/JK-exchange?charset=utf8mb4'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nsfocus@127.0.0.1:3306/work'
     REDIS_SERVER_HOST = '127.0.0.1'
 
 
@@ -120,10 +121,40 @@ class DevelopmentConfig(Config):
 #     REDIS_SERVER_HOST = '127.0.0.1'
 
 
+
+class TestingConfig(Config):
+         TESTING = True
+         SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@139.196.78.95:3306/JK-exchange-test?charset=utf8mb4'
+         ELASTIC_SEARCH_HOST = ''
+         CERT_PATH = '/usr/local/www/cert'
+         CDN_STATIC_PATH = tempfile.gettempdir()
+         CDN_STATIC_URL = 'http://cdn.liyun.com/static/'
+         REDIS_SERVER_HOST = '127.0.0.1'
+
+
+class Testing2Config(Config):
+         TESTING = True
+         SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@139.196.78.95:3306/JK-exchange-test?charset=utf8mb4'
+         ELASTIC_SEARCH_HOST = ''
+         CERT_PATH = '/usr/local/www/cert'
+         CDN_STATIC_PATH = tempfile.gettempdir()
+         CDN_STATIC_URL = 'http://cdn.liyun.com/static/'
+         REDIS_SERVER_HOST = '127.0.0.1'
+
+
+class ProductionConfig(Config):
+         SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@139.196.78.95:3306/JK-exchange?charset=utf8mb4'
+         CERT_PATH = '/usr/local/www/cert'
+         SERVICE_CATE_ID = ''
+         CDN_STATIC_PATH = '/usr/local/xiaoyunbao/static/'
+         CDN_STATIC_URL = 'http://static.xiaoyunbao.com.cn/'
+         REDIS_SERVER_HOST = '127.0.0.1'
+
+
 config = {
-    #'development': DevelopmentConfig,
-    # 'testing': TestingConfig,
-    # 'testing2': Testing2Config,
+    # 'development': DevelopmentConfig,
+    #  'testing': TestingConfig,
+    #  'testing2': Testing2Config,
     # 'production': ProductionConfig,
     'default': DevelopmentConfig
 }

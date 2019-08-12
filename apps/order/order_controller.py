@@ -44,11 +44,10 @@ class OrderApi(object):
     def get_maker_order_list(self, user_id):
         try:
             order_obj_list = self.db.session.query(MakerOrder).\
-                filter(MakerOrder.user_id == user_id).f
-            return order_obj
-        except:
-            LOG.error(print_exc())
-        return None
+                filter(MakerOrder.user_id == user_id).all()
+        except Exception:
+            pass
+
 
     def create_maker_order(self, user_id, book_no, hold_currency,
                            hold_amount, exchange_currency,

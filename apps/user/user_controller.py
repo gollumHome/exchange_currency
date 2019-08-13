@@ -7,12 +7,14 @@
 
 from traceback import print_exc
 import random
+import time
 import string
 import logging
 from sqlalchemy import *
 from apps.utils import md5
+from apps.constant import REWARD_AMOUT
 
-from apps.models import  User
+from apps.models import *
 from apps.redis_client import RedisClient
 
 redis_api = RedisClient()
@@ -24,6 +26,27 @@ class UserApi(object):
     def __init__(self, db):
         self.db = db
 
+    def invite_recrod(self, data):
+        try:
+            user = self.db.session.query(User).filter(User.invite_code\
+                                                      ==data['invite_code']).first()
+            if not user:
+                raise Exception
+            salt = ''.join(random.sample(string.ascii_letters + string.digits, 32))
+            self.db.session.add(UserReward(
+                amount=REWARD_AMOUT,
+                user_id=user.id,
+                password=md5(data['password'], salt),
+                email=data['email'],
+                share_id=data['invite_code'],
+                create_time=int(time.time()),
+                status=data['status']))
+            self.db.session.flush()
+            return True
+        except Exception:
+            logger.error(print_exc())
+            return False
+
     def register(self, data):
         try:
             salt = ''.join(random.sample(string.ascii_letters + string.digits, 32))
@@ -31,9 +54,9 @@ class UserApi(object):
                                      salt=salt,
                                      password=md5(data['password'], salt),
                                      email=data['email'],
-                                     status=data['status'],
-                                     invite_code=data['invite_code']))
-            self.db.session.commit()
+                                     invite_code=data['invite_code'],
+                                     status=data['status']))
+            self.db.session.flush()
             return True
         except Exception:
             logger.error(print_exc())
@@ -60,3 +83,14 @@ class UserApi(object):
         if password != md5(password, salt):
             return False
         return True
+
+    def get_invite_recrod_list(self,user_id, page, size):
+        try:
+            recrod_obj_list = self.db.session.query(UserReward).\
+                filter(TakerOrder.user_id == user_id).\
+                limit(size).offset((page - 1) * size)
+            if recrod_obj_list:
+                return recrod_obj_list
+        except Exception:
+            logger.error(print_exc())
+            return None

@@ -294,7 +294,6 @@ class UserReward(db.Model):
     share_id = Column(BIGINT(20), nullable=False)
     title = Column(VARCHAR(150))
     amount = Column(INTEGER(11), nullable=False)
-    order_id = Column(BIGINT(20), unique=True)
     status = Column(Enum('bereward', 'canceled', 'rewarded'))
     finish_time = Column(INTEGER(11))
     create_time = Column(INTEGER(11), nullable=False)

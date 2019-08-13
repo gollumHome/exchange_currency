@@ -16,12 +16,16 @@ from apps.auths import Auth
 from flask import current_app
 from apps.aliyun_oss import AliyunOss
 from apps.user.user_controller import UserApi
-
+from apps.email_service import EmailApi
 from apps.constant import USER_STATUS
+from apps.order.db_submit_controller import AtoSubmit
+from apps.constant import REWARD_STATUS
+
+
+from apps.utils import rand_str
 #aliyun_oss = AliyunOss()
 user_api = UserApi(db)
-
-
+#email_api = EmailApi()
 
 logger = logging.getLogger()
 
@@ -271,7 +275,7 @@ def user_login_out():
     return jsonify({'code': '500', 'info': '内部错误'})
 
 
-@uv.route('/userinfo', methods=['POST'])
+@uv.route('/userinfo', methods=['PUT'])
 def user_info():
     """修改用户信息
     @@@
@@ -300,7 +304,7 @@ def user_info():
     additional_emails = request_data.get('additional_emails', '')
     verify_channel = request_data.get('verify_channel', '')
     passport_verify = request_data.get('passport_verify', '')
-    ID_verify = request_data.get('ID_verify', '')
+    id_verify = request_data.get('ID_verify', '')
     if user_name == '' and head_url == '' \
             or telephone == '' or additional_emails == '':
         return jsonify({"code": "400", "infog": "请输入正确参数"})
@@ -323,8 +327,8 @@ def user_info():
                 user.verify_channel = verify_channel
             if passport_verify:
                 user.passport_verify = passport_verify
-            if ID_verify:
-                user.ID_verify = ID_verify
+            if id_verify:
+                user.ID_verify = id_verify
             db.session.commit()
         return jsonify({"code": "200", "info": "更新信息成功"})
     except Exception:
@@ -332,9 +336,38 @@ def user_info():
         return jsonify({"code": "500", "info": "更新信息失败"})
 
 
-@uv.route('/userinfo', methods=['POST'])
+@uv.route('/register/', methods=['POST'])
+def user_register():
+    """【注册用户】
+       url格式： /api/v1/user/register/?
+      @@@
+      #### args
+        | args | nullable | type | remark |
+        |--------|--------|--------|--------|
+        | email |    false    |    string   |  注册邮箱 |
+        | password |    false    |    string   |  密码 |
+         #### return
+        - ##### json
+       >  {"code": "200"}
+        @@@
+      """
+    data = json.load(request.data)
+    password = data.get('password', '')
+    email = data.get('email', '')
+    if email == '' or password == '':
+        return jsonify({"code": "400", "info": "缺少关键参数"})
+    data['status'] = USER_STATUS['normal']
+    data['invite_code'] = rand_str(32)
+    success = user_api.register(data)
+    if not success:
+        return jsonify({"code": "500", 'info': "注册失败"})
+    return jsonify({"code": "200", 'info': "注册成功，请重新登陆"})
+
+
+
+@uv.route('/password_reset', methods=['POST'])
 def user_reset_password():
-    """密码重置
+    """密码重置,忘记密码
     @@@
     #### args
 
@@ -351,62 +384,51 @@ def user_reset_password():
     """
     request_data = request.json
     email = request_data.get('email', '')
-    confirm = request_data.get('confirm', False)
+    reset = request_data.get('reset', False)
     password = request_data.get('password', False)
     if email == "":
         return jsonify({"code": "400", "infog": "请输入正确参数"})
     user = User.query.filter(User.email == email).first()
     if not user:
         return jsonify({"code": "400", "infog": "该用户不存在"})
-    if confirm:
-        reset_status = user_api.update_user_password(user, password)
-        if reset_status:
-            return jsonify({"code": "200", "infog": "密码重置成功，重新登陆"})
-        if not reset_status:
-            return jsonify({"code": "500", "infog": "密码重置失败"})
-    return jsonify({"code": "403", "infog": "非法请求"})
+    if not reset:
+        return jsonify({"code": "403", "infog": "非法请求"})
+    if not password:
+        return jsonify({"code": "400", "infog": "参数缺失"})
+    reset_status = user_api.update_user_password(user, password)
+    if not reset_status:
+        return jsonify({"code": "500", "infog": "更新密码失败"})
+    return jsonify({"code": "200", "infog": ""})
 
 
-@uv.route('/register/', methods=['POST'])
-def user_register():
-    """【注册用户】
-       url格式： /api/v1/user/register/?
-      @@@
-      #### args
-        | args | nullable | type | remark |
-        |--------|--------|--------|--------|
-        | username    |    true    |    string   |   用户名称   |
-        | head_url  |    true    |    string   | 用户头像  |
-        | telephone     |    true    |    string   |    注册电话  |
-        | email |    false    |    string   |  注册邮箱 |
-        | password |    false    |    string   |  密码 |
-        | id_verify       |    true    |    string   |   身份证 |
-        |  passport_verify        |    true    |    string   |   护照|
-        |  verify_channel        |    false    |    string   |   认证类型 |
-        |  invite_code        |    true    |    string   |   邀请码|
-        |  additional_emails        |    true    |    string   |  补充邮箱 |
-         #### return
-        - ##### json
-       >  {"code": "200"}
-        @@@
-      """
-    data = request.json
+@uv.route('/preset_mail', methods=['POST'])
+def reset_password_mail():
+    """密码重置,确认修改
+    @@@
+    #### args
 
-    password = data.get('password', '')
-    email = data.get('email', '')
+    | args | nullable | type | remark |
+    |--------|--------|--------|--------|
+    |    email    |    false    |    string   |    用户账号  |
 
-    invite_code = data.get('invite_code', '')
+    #### return
+    - #####
+    > {"code":"200"}
+    @@@
+    """
+    request_data = request.json
+    email = request_data.get('email', '')
+    if email == "":
+        return jsonify({"code": "400", "infog": "请输入正确参数"})
+    user = User.query.filter(User.email == email).first()
+    if not user:
+        return jsonify({"code": "400", "infog": "该用户不存在"})
+    send_status = email_api.send_mail(email)
+    if not send_status:
+        return jsonify({"code": "500", "infog": "内部接口异常"})
+    return jsonify({"code": "200", "infog": "发送成功"})
 
-    if email == '' or password == '':
-        return jsonify({"code": "400", "info": "缺少关键参数"})
 
-    if not invite_code:
-        data['invite_code'] = ''
-    data['status'] = USER_STATUS['normal']
-    success = user_api.register(data)
-    if not success:
-        return jsonify({"code": "500", 'info': "注册失败"})
-    return jsonify({"code": "200", 'info': "注册成功，请重新登陆"})
 
 
 

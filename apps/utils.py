@@ -11,6 +11,7 @@ import random
 import hashlib
 import logging
 import traceback
+import string
 from functools import wraps
 import xml.etree.ElementTree as elementTree
 
@@ -27,6 +28,10 @@ def md5(pwd, salt):
     obj.update(pwd.encode('utf-8'))
     return obj.hexdigest()
 
+
+def rand_str(len):
+    ''.join(random.sample(string.ascii_letters + string.digits, len))
+    return
 
 def parse_offset_limit(request):
     offset = int(request.args.get("offset") or 0)

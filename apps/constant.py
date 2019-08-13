@@ -62,3 +62,11 @@ USER_STATUS = {
     'beVerified': 'beVerified',
     'rejected': 'rejected'
 }
+
+
+REWARD_STATUS = {
+    'bereward': 'bereward',
+    'canceled': 'canceled',
+    'rewarded': 'rewarded'
+}
+REWARD_AMOUT = 100

@@ -233,7 +233,8 @@ def user_login():
 
     | args | nullable | type | remark |
     |--------|--------|--------|--------|
-    |    code    |    false    |    string   |    临时登录凭证    |
+    |    email    |    false    |    string   |    登陆邮箱   |
+    |    password    |    false    |    string   |    登陆密码   |
 
     #### return
     - ##### json
@@ -263,7 +264,7 @@ def user_login_out():
     |--------|--------|--------|--------|
     return
     - ##### json
-    > {"code": "200", "user_id": 202000,"u_token":"4d43082ecddb11e8aa4200163e0f3b60"}
+    > {"code": "200", "info" : ""}
     @@@
     """
     user_id = 1

@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 @ov.route('/maker_order/', methods=['POST'])
 def create_order():
-    """【更新maker order 状态】
+    """【创建maker order 】
       url格式： /api/v1/order/taker_order/?pk=4
      @@@
      #### args

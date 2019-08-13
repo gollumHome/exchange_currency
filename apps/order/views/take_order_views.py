@@ -252,7 +252,16 @@ def get_taker_order_list():
       |--------|--------|--------|--------|
       #### return
       - ##### json
-      >  {"code": "200"}
+      >  {"code": "200" ，"data":{
+                "book_no": "",
+                "user_id": 1,
+                "hold_currency": '1',
+                "exchange_currency": '2',
+                "hold_amount": 100,
+                "exchange_amount": 50,
+                "exchange_rate": 0.08,
+                "create_time": 12345678,
+                "stauts": 'matched'}}
       @@@
       """
     user_id = 1

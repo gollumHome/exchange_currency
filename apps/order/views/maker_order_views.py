@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-import enum
-from decimal import Decimal
 import json
-from apps.order.constant import TAKER_ORDER_STATUS,MAKER_ORDER_STATUS\
+from apps.constant import TAKER_ORDER_STATUS,MAKER_ORDER_STATUS\
     ,EXCHANGE_PROCESS_STATUS,ENTRUST_TYPE
 
 from flask import jsonify, request
@@ -14,7 +12,6 @@ from apps.order.order_controller import OrderApi
 from apps.order.exchange_process_controller import ProcesApi
 from apps.order.subscribe_controller import SubscribeApi
 from apps.order.sms_controller import SmsController
-from apps.models import *
 
 from apps.redis_client import RedisClient
 from apps.models import *

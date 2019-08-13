@@ -2,13 +2,9 @@
 
 
 import logging
-from threading import Thread
-from apps.models import *
 
 from apps.redis_client import RedisClient
-from apps.order.constant import PROCESS_STATUS_EXPIRE_TIME
-
-from traceback import print_exc
+from apps.constant import PROCESS_STATUS_EXPIRE_TIME
 
 LOG =logging.getLogger(__name__)
 

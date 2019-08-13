@@ -272,7 +272,7 @@ class User(db.Model):
     telephone = Column(String(12), comment='手机')
     email = Column(String(120), comment='登录邮箱')
     access_token = db.Column(db.String(1500), unique=False, index=False)
-    id_verify = Column(JSON, comment='身份证认证')
+    ID_verify = Column(JSON, comment='身份证认证')
     login_time = Column(INTEGER(11), index=True)
     status = Column(Enum('normal', 'black', 'beVerified', 'rejected'), index=True)
     passport_verify = Column(JSON, comment='护照认证')

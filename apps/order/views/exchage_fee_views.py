@@ -1,17 +1,8 @@
 # -*- coding: utf-8 -*-
-import enum
-from decimal import Decimal
-from apps.order.constant import TAKER_ORDER_STATUS,\
-    PROCESS_STATUS_EXPIRE_TIME, ENTRUST_TYPE,\
-    EXCHANGE_PROCESS_STATUS
-from apps import db
-from flask import jsonify, request
-import uuid
 import logging
 from apps.order import ov
 from flask import jsonify, request
 from apps.order.order_controller import OrderApi
-from apps.models import *
 from apps.tencent_sms import TencentSms
 
 from apps.redis_client import RedisClient

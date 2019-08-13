@@ -2,10 +2,7 @@
 from apps import create_app
 from flask_sqlalchemy import SQLAlchemy
 import unittest
-import uuid
 import json
-from apps.order.constant import ECCHANGE_CURRENCY_TYPE,\
-    MAKER_ORDER_STATUS
 from apps.models import *
 
 app = create_app('testing')

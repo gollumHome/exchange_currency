@@ -5,10 +5,7 @@ from traceback import print_exc
 from apps.models import *
 import time
 from decimal import Decimal
-from .constant import TAKER_ORDER_STATUS,PROCESS_STATUS_EXPIRE_TIME,\
-    EXCHANGE_PROCESS_STATUS
-
-from apps.tencent_sms import TencentSms
+from apps.constant import TAKER_ORDER_STATUS,PROCESS_STATUS_EXPIRE_TIME
 
 LOG =logging.getLogger(__name__)
 

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from apps.order.constant import TAKER_ORDER_STATUS, \
+from apps.constant import TAKER_ORDER_STATUS, \
     ENTRUST_TYPE,\
     EXCHANGE_PROCESS_STATUS,MAKER_ORDER_STATUS
 from flask import jsonify, request
-import uuid
 import json
 import logging
 from apps.order import ov

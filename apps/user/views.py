@@ -13,10 +13,11 @@ from apps import db, tc_oss, tc_sms
 from apps.user import uv
 from apps.models import *
 from apps.auths import Auth
+from flask import current_app
 from apps.aliyun_oss import AliyunOss
 from apps.user.user_controller import UserApi
 
-
+from apps.constant import USER_STATUS
 #aliyun_oss = AliyunOss()
 user_api = UserApi(db)
 
@@ -261,8 +262,7 @@ def user_login_out():
     > {"code": "200", "user_id": 202000,"u_token":"4d43082ecddb11e8aa4200163e0f3b60"}
     @@@
     """
-    json_data = request.headers.get('user_id')
-    user_id = json_data.get('user_id', '')
+    user_id = 1
     if not user_id:
         jsonify({'code': '400', 'info': "参数错误"})
     status = user_api.logout(user_id)
@@ -272,7 +272,6 @@ def user_login_out():
 
 
 @uv.route('/userinfo', methods=['POST'])
-
 def user_info():
     """修改用户信息
     @@@
@@ -280,9 +279,13 @@ def user_info():
 
     | args | nullable | type | remark |
     |--------|--------|--------|--------|
-    |    user_name    |    trure    |    string   |    用户昵称   |
+    |    user_name    |    trure    |    string   |    用户名称   |
     |    head_url    |    trure    |    string   |    用户头像    |
-    |    password    |    trure    |    string   |    用户头像    |
+    |    telephone    |    trure    |    string   |    用户密码    |
+    |    verify_channel    |    false    |    string   |    认证类型 <'passport', 'ID'> |
+    |    additional_emails    |    trure    |    string   |    补充邮箱   |
+    |    passport_verify    |    trure    |    string   |    护照认证 <与身份证认证二选一>   |
+    |    ID_verify    |    trure    |    string   |    身份证认证    |
 
     #### return
     - #####
@@ -290,14 +293,20 @@ def user_info():
     @@@
     """
     user_id = 1
-    request_data = request.json
+    request_data = json.loads(request.data)
     user_name = request_data.get('user_name', '')
     head_url = request_data.get('head_url', '')
-    telephone = request_data.get('telephone','')
+    telephone = request_data.get('telephone', '')
     additional_emails = request_data.get('additional_emails', '')
+    verify_channel = request_data.get('verify_channel', '')
+    passport_verify = request_data.get('passport_verify', '')
+    ID_verify = request_data.get('ID_verify', '')
     if user_name == '' and head_url == '' \
             or telephone == '' or additional_emails == '':
         return jsonify({"code": "400", "infog": "请输入正确参数"})
+
+    if not verify_channel:
+        return jsonify({"code": "400", "infog": "认证类型必须选择"})
 
     user = User.query.filter(User.id == int(user_id)).first()
     try:
@@ -310,6 +319,12 @@ def user_info():
                 user.telephone = telephone
             if additional_emails:
                 user.additional_emails = additional_emails
+            if verify_channel:
+                user.verify_channel = verify_channel
+            if passport_verify:
+                user.passport_verify = passport_verify
+            if ID_verify:
+                user.ID_verify = ID_verify
             db.session.commit()
         return jsonify({"code": "200", "info": "更新信息成功"})
     except Exception:
@@ -318,9 +333,8 @@ def user_info():
 
 
 @uv.route('/userinfo', methods=['POST'])
-
 def user_reset_password():
-    """修改用户信息
+    """密码重置
     @@@
     #### args
 
@@ -361,13 +375,13 @@ def user_register():
       #### args
         | args | nullable | type | remark |
         |--------|--------|--------|--------|
-        | username    |    false    |    string   |   用户名称   |
+        | username    |    true    |    string   |   用户名称   |
         | head_url  |    true    |    string   | 用户头像  |
-        | telephone     |    false    |    string   |    注册电话  |
+        | telephone     |    true    |    string   |    注册电话  |
         | email |    false    |    string   |  注册邮箱 |
-        | ID_verify       |    true    |    string   |   身份证 |
-        |  status        |    false    |    string   |   用户状态['normal', 'black', 'beVerified', 'rejected'] |
-        |  Passport_verify        |    true    |    string   |   护照|
+        | password |    false    |    string   |  密码 |
+        | id_verify       |    true    |    string   |   身份证 |
+        |  passport_verify        |    true    |    string   |   护照|
         |  verify_channel        |    false    |    string   |   认证类型 |
         |  invite_code        |    true    |    string   |   邀请码|
         |  additional_emails        |    true    |    string   |  补充邮箱 |
@@ -378,17 +392,17 @@ def user_register():
       """
     data = request.json
 
-    user_name = data.get('user_name', '')
     password = data.get('password', '')
-    telephone = data.get('telephone', '')
     email = data.get('email', '')
-    verify_channel = data.get('verify_channel', '')
 
-    if user_name == '' or telephone == ''\
-        or email == '' or verify_channel == '' \
-            or password == '':
+    invite_code = data.get('invite_code', '')
+
+    if email == '' or password == '':
         return jsonify({"code": "400", "info": "缺少关键参数"})
 
+    if not invite_code:
+        data['invite_code'] = ''
+    data['status'] = USER_STATUS['normal']
     success = user_api.register(data)
     if not success:
         return jsonify({"code": "500", 'info': "注册失败"})

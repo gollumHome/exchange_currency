@@ -27,18 +27,12 @@ class UserApi(object):
     def register(self, data):
         try:
             salt = ''.join(random.sample(string.ascii_letters + string.digits, 32))
-            self.db.session.add(User(user_name=data['user_name'],
+            self.db.session.add(User(
                                      salt=salt,
                                      password=md5(data['password'], salt),
-                                     head_url=data['head_url'],
-                                     telephone=data['telephone'],
                                      email=data['email'],
-                                     ID_verify=data['id_verify'],
                                      status=data['status'],
-                                     Passport_verify=data['passport_verify'],
-                                     verify_channel=data['verify_channel'],
-                                     invite_code=data['invite_code'],
-                                     additional_emails=data['additional_emails']))
+                                     invite_code=data['invite_code']))
             self.db.session.commit()
             return True
         except Exception:

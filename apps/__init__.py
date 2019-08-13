@@ -8,6 +8,8 @@ from .tencent_sms import TencentSms
 from .tencent_oss import TencentOss
 from .redis_client import RedisClient
 
+
+
 db = SQLAlchemy()
 tc_sms = TencentSms()
 tc_oss = TencentOss()

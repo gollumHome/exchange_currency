@@ -54,3 +54,11 @@ ECCHANGE_CURRENCY_TYPE = {
     'CNY': '1',
     'USD': '2'
 }
+
+
+USER_STATUS = {
+    'normal': 'normal',
+    'black': 'black',
+    'beVerified': 'beVerified',
+    'rejected': 'rejected'
+}

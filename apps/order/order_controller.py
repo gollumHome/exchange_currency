@@ -8,15 +8,9 @@
 from traceback import print_exc
 import time
 import logging
-from sqlalchemy import *
-from apps.utils import Utils
-
-from .constant import TAKER_ORDER_STATUS
 
 from apps.models import MakerOrder,TakerOrder
-from apps.order.constant import  ECCHANGE_CURRENCY_TYPE
-from apps.order.exchange_process_controller import ProcesApi
-from apps.models import  User
+from apps.constant import  ECCHANGE_CURRENCY_TYPE
 
 LOG =logging.getLogger(__name__)
 

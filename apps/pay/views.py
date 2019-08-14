@@ -4,7 +4,7 @@ import time
 import json
 from decimal import Decimal
 from traceback import print_exc
-from dateutil.relativedelta import relativedelta
+
 import datetime
 from flask import g,jsonify, current_app, request
 import logging
@@ -153,16 +153,13 @@ def wx_pay_notify():
 
 @pv.route('/reward', methods=['POST'])
 def add_reward():
-    from celerys.tasks import async_add_reward
+    #from celerys.tasks import async_add_reward
     #async_add_reward.apply_async(args=[161], queue='ADD_REWARD_QUEUE')
     return jsonify({})
 
 
 @pv.route('/unipay', methods=['POST'])
-<<<<<<< HEAD
-=======
 @identify_required
->>>>>>> 4eb8e4325bb8d9998f3cb033682a5d00f811453a
 def unipay():
     """小程序调起支付所需的签名数据
         @@@

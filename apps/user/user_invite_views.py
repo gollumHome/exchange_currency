@@ -25,8 +25,8 @@ from flask import current_app
 
 
 from apps.utils import rand_str
-#aliyun_oss = AliyunOss()
-#mail_api = EmailApi()
+aliyun_oss = ''
+mail_api = ''
 
 logger = logging.getLogger()
 

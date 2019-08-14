@@ -23,9 +23,10 @@ from apps.constant import REWARD_STATUS
 
 
 from apps.utils import rand_str
-#aliyun_oss = AliyunOss()
+aliyun_oss = ''
 user_api = UserApi(db)
-#email_api = EmailApi()
+email_api = ''
+
 
 logger = logging.getLogger()
 
@@ -363,7 +364,6 @@ def user_register():
     if not success:
         return jsonify({"code": "500", 'info': "注册失败"})
     return jsonify({"code": "200", 'info': "注册成功，请重新登陆"})
-
 
 
 @uv.route('/password_reset', methods=['POST'])

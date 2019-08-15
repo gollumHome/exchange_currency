@@ -122,78 +122,78 @@ def sms_valid():
     return jsonify(result)
 
 
-# @uv.route('/sendcode', methods=['GET'])
-# def send_code():
-#     """【发送验证码】
-#           url格式： /api/v1/user/sendcode?telephone=13333333333?verify_type=mch_register
-#          @@@
-#          #### args
-#
-#          | args | nullable | type | remark |
-#          |--------|--------|--------|--------|
-#          |    telephone    |    false    |    string   |    手机号  |
-#          |    verify_type  |    false    |    string   |    验证类型 ['mch_register','add_phone','reset_pass','withdraw'] |
-#
-#          #### return
-#          - ##### json
-#          >  {"code": "200"}
-#          @@@
-#          """
-#     telephone = request.args.get('telephone', None)
-#     verify_type = request.args.get('verify_type', None)
-#     logger.warning(type(telephone))
-#     now_time = int(time.time())
-#     telephone = telephone
-#     ret = re.match(r"^1[356789]\d{9}$", telephone)
-#     working_app = current_app._get_current_object()
-#     if telephone is None:
-#         return jsonify({"code": "400", "info": "手机号不能为空"})
-#     elif not ret:
-#         return jsonify({"code": "500", "info": "请输入正确的手机号"})
-#     else:
-#         # 判断是否已有验证码 （2=有效）
-#         tvc = TelVerifyCode.query.filter(TelVerifyCode.telephone == telephone,
-#                                          TelVerifyCode.usable == 2,
-#                                          TelVerifyCode.verify_type==verify_type).first()
-#         if tvc:
-#             if tvc.dead_line > now_time:
-#                 return jsonify({"code": "500", "info": "请务重复发送"})
-#             else:
-#                 tvc.usable = 1
-#                 db.session.commit()
-#                 verifyCode = Utils.get_code()
-#                 params = [str(verifyCode), working_app.config['VERIFY_USEFUL_DATE']]
-#                 smsInfo = tc_sms.send_sms(telephone, params, verify_type)
-#
-#                 if smsInfo['result'] == 0:
-#                     create_time = int(time.time())
-#                     dead_line = create_time + int(working_app.config['VERIFY_USEFUL_DATE'])
-#
-#                     # 插入手机验证码表
-#                     telVerifyInfo = TelVerifyCode(telephone=telephone, verifyCode=verifyCode,
-#                                                   create_time=create_time,
-#                                                   dead_line=dead_line, usable=2,verify_type=verify_type)
-#                     db.session.add(telVerifyInfo)
-#                     db.session.commit()
-#                     return jsonify({'code': '200', "info": "发送成功"})
-#                 else:
-#                     return jsonify({"code": "500", "info": "请重新发送验证码"})
-#         else:
-#             verifyCode = Utils.get_code()
-#             params = [str(verifyCode), working_app.config['VERIFY_USEFUL_DATE']]
-#             smsInfo = tc_sms.send_sms(telephone, params, verify_type)
-#             if smsInfo['result'] == 0:
-#                 create_time = int(time.time())
-#                 dead_line = create_time + int(working_app.config['VERIFY_USEFUL_DATE'])
-#
-#                 # 插入手机验证码表
-#                 telVerifyInfo = TelVerifyCode(telephone=telephone, verifyCode=verifyCode, create_time=create_time,
-#                                               dead_line=dead_line, usable=2,verify_type=verify_type)
-#                 db.session.add(telVerifyInfo)
-#                 db.session.commit()
-#                 return jsonify({'code': '200', "info": "发送成功"})
-#             else:
-#                 return jsonify({"code": "500", "info": "请重新发送验证码"})
+@uv.route('/sendcode', methods=['GET'])
+def send_code():
+     """【发送验证码】
+          url格式： /api/v1/user/sendcode?telephone=13333333333?verify_type=mch_register
+         @@@
+         #### args
+
+         | args | nullable | type | remark |
+          |--------|--------|--------|--------|
+          |    telephone    |    false    |    string   |    手机号  |
+          |    verify_type  |    false    |    string   |    验证类型 ['mch_register','add_phone','reset_pass','withdraw'] |
+
+          #### return
+          - ##### json
+         >  {"code": "200"}
+         @@@
+         """
+     telephone = request.args.get('telephone', None)
+     verify_type = request.args.get('verify_type', None)
+     logger.warning(type(telephone))
+     now_time = int(time.time())
+     telephone = telephone
+     ret = re.match(r"^1[356789]\d{9}$", telephone)
+     working_app = current_app._get_current_object()
+     if telephone is None:
+         return jsonify({"code": "400", "info": "手机号不能为空"})
+     elif not ret:
+         return jsonify({"code": "500", "info": "请输入正确的手机号"})
+     else:
+         # 判断是否已有验证码 （2=有效）
+         tvc = TelVerifyCode.query.filter(TelVerifyCode.telephone == telephone,
+                                          TelVerifyCode.usable == 2,
+                                          TelVerifyCode.verify_type==verify_type).first()
+         if tvc:
+             if tvc.dead_line > now_time:
+                 return jsonify({"code": "500", "info": "请务重复发送"})
+             else:
+                 tvc.usable = 1
+                 db.session.commit()
+                 verifyCode = Utils.get_code()
+                 params = [str(verifyCode), working_app.config['VERIFY_USEFUL_DATE']]
+                 smsInfo = tc_sms.send_sms(telephone, params, verify_type)
+
+                 if smsInfo['result'] == 0:
+                     create_time = int(time.time())
+                     dead_line = create_time + int(working_app.config['VERIFY_USEFUL_DATE'])
+
+                     # 插入手机验证码表
+                     telVerifyInfo = TelVerifyCode(telephone=telephone, verifyCode=verifyCode,
+                                                   create_time=create_time,
+                                                  dead_line=dead_line, usable=2,verify_type=verify_type)
+                     db.session.add(telVerifyInfo)
+                     db.session.commit()
+                     return jsonify({'code': '200', "info": "发送成功"})
+                 else:
+                     return jsonify({"code": "500", "info": "请重新发送验证码"})
+         else:
+             verifyCode = Utils.get_code()
+             params = [str(verifyCode), working_app.config['VERIFY_USEFUL_DATE']]
+             smsInfo = tc_sms.send_sms(telephone, params, verify_type)
+             if smsInfo['result'] == 0:
+                 create_time = int(time.time())
+                 dead_line = create_time + int(working_app.config['VERIFY_USEFUL_DATE'])
+
+                 # 插入手机验证码表
+                 telVerifyInfo = TelVerifyCode(telephone=telephone, verifyCode=verifyCode, create_time=create_time,
+                                               dead_line=dead_line, usable=2,verify_type=verify_type)
+                 db.session.add(telVerifyInfo)
+                 db.session.commit()
+                 return jsonify({'code': '200', "info": "发送成功"})
+             else:
+                 return jsonify({"code": "500", "info": "请重新发送验证码"})
 
 
 @uv.route("/upload", methods=['POST'])
@@ -251,8 +251,8 @@ def user_login():
         if login_status:
             return Auth.authenticate(Auth, user, current_app.config['USER_TOKEN_USEFUL_DATE'],
                                      current_app.config['SECRET_KEY'])
-        return jsonify({'code': '400', "infog": "账号名或密码错误"})
-    return jsonify({'code': '500', "infog": "系统内部错误"})
+        return jsonify({'code': '400', "info": "账号名或密码错误"})
+    return jsonify({'code': '500', "info": "系统内部错误"})
 
 
 @uv.route('/user/login_out', methods=['POST'])

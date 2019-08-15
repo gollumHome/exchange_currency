@@ -1,15 +1,13 @@
-# school-saas-api
+
+# exchange-currency-api
 
 #### 介绍
 服务器端接口
 
 #### 模块
 - user: 用户
-- merchant: 商家
-- activity: 活动
 - pay: 支付
 - order: 订单
-- course: 课程
 - backend: 后台
 
 #### 生成 Model
@@ -50,3 +48,5 @@ python -m pytest -s test\test_merchant.py::TestMerchant::test_register
 python manage.py
 ```
 打开 [http://localhost:8000/docs/api](http://localhost:8000/docs/api)
+=======
+# exchange_currency

@@ -88,7 +88,7 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     #SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nas@mhm1234@139.196.78.95:3306/JK-exchange?charset=utf8mb4'
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:nsfocus@127.0.0.1:3306/work'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:as@mhm1234@127.0.0.1:3306/work'
     REDIS_SERVER_HOST = '127.0.0.1'
 
 
